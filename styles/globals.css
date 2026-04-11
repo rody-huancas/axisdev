@@ -1,1 +1,44 @@
 @import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  --axis-bg: #111315;
+  --axis-surface: #212332;
+  --axis-surface-strong: #1a1c25;
+  --axis-border: rgba(148, 163, 184, 0.12);
+  --axis-glow: rgba(108, 99, 255, 0.35);
+  --axis-text: #e2e8f0;
+  --axis-muted: #94a3b8;
+  --axis-accent: #7b5cff;
+  --axis-accent-2: #38bdf8;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --axis-bg: #f5f6fa;
+  --axis-surface: #ffffff;
+  --axis-surface-strong: #f0f2f8;
+  --axis-border: rgba(15, 23, 42, 0.08);
+  --axis-glow: rgba(108, 99, 255, 0.25);
+  --axis-text: #0f172a;
+  --axis-muted: #64748b;
+  --axis-accent: #6c63ff;
+  --axis-accent-2: #60a5fa;
+}
+
+@layer base {
+  * {
+    border-color: var(--axis-border);
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background: var(--axis-bg);
+    color: var(--axis-text);
+    font-family: var(--font-poppins);
+  }
+}
