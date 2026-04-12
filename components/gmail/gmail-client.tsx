@@ -256,38 +256,7 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
 
               <div className="shrink-0 flex items-center justify-between gap-3 border-t border-(--axis-border) bg-(--axis-surface) px-6 py-4">
                 <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsReplyOpen(true)}
-                    className="flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--axis-text) transition hover:bg-(--axis-surface)"
-                  >
-                    <RiReplyLine className="h-4 w-4" />
-                    Responder
-                  </button>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    className="flex h-10 w-10 items-center justify-center rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) text-(--axis-muted) transition hover:bg-(--axis-surface) hover:text-amber-400"
-                    title="Destacar"
-                  >
-                    <RiStarLine className="h-5 w-5" />
-                  </button>
-                  <button
-                    type="button"
-                    className="flex h-10 w-10 items-center justify-center rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) text-(--axis-muted) transition hover:bg-(--axis-surface) hover:text-red-400"
-                    title="Marcar como spam"
-                  >
-                    <RiSpamLine className="h-5 w-5" />
-                  </button>
-                  <button
-                    type="button"
-                    className="flex h-10 w-10 items-center justify-center rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) text-(--axis-muted) transition hover:bg-(--axis-surface) hover:text-red-500"
-                    title="Eliminar"
-                  >
-                    <RiDeleteBin6Line className="h-5 w-5" />
-                  </button>
-                </div>
+                  
               </div>
 
               {isReplyOpen && (
