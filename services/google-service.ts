@@ -390,3 +390,62 @@ export const fetchGmailPreview = async (): Promise<ServiceResult<GmailMensaje[]>
     return { ok: false, error: handleAxiosError(error) };
   }
 };
+
+export const fetchGmailMessages = async (maxResults = 50): Promise<ServiceResult<GmailMensaje[]>> => {
+  try {
+    const auth = await withAuthHeaders();
+    if (!auth.ok) return auth;
+
+    const listResponse = await axios.get(
+      `${env.api.gmail}/messages`,
+      {
+        headers: auth.headers,
+        params: {
+          maxResults,
+          labelIds: "INBOX",
+        },
+      },
+    );
+
+    const messages = listResponse.data?.messages ?? [];
+    const details = await Promise.all(
+      messages.map((message: { id: string }) =>
+        axios
+          .get(
+            `${env.api.gmail}/messages/${message.id}`,
+            {
+              headers: auth.headers,
+              params: {
+                format: "metadata",
+                metadataHeaders: ["Subject", "From", "Date", "To"],
+              },
+            },
+          )
+          .then((response) => response.data)
+          .catch(() => null),
+      ),
+    );
+
+    const mapped = details
+      .filter(Boolean)
+      .map(
+        (message: {
+          id      : string;
+          snippet?: string;
+          payload?: { headers?: Array<{ name: string; value: string }> };
+        }) => {
+          const headers = message.payload?.headers ?? [];
+          return {
+            id       : message.id,
+            asunto   : getHeaderValue(headers, "Subject") || "Sin asunto",
+            remitente: getHeaderValue(headers, "From") || "Remitente desconocido",
+            snippet  : message.snippet ?? "",
+          };
+        },
+      );
+
+    return { ok: true, data: mapped };
+  } catch (error) {
+    return { ok: false, error: handleAxiosError(error) };
+  }
+};
