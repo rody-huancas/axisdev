@@ -8,7 +8,7 @@ import type { DriveFile } from "@/services/google-service";
 import { uploadDriveFile } from "@/actions/google/upload-drive-file";
 import { FilePreviewModal } from "@/components/drive/file-preview-modal";
 import { createDriveFolder } from "@/actions/google/create-drive-folder";
-import { RiArrowLeftLine, RiDownloadLine, RiFileExcel2Line, RiFileImageLine, RiFilePpt2Line, RiFileTextLine, RiFolder3Line, RiFolderAddLine, RiInboxLine, RiLayoutGridLine, RiListUnordered, RiSearchLine, RiUploadCloud2Line } from "react-icons/ri";
+import { RiArrowRightSLine, RiDownloadLine, RiFileExcel2Line, RiFileImageLine, RiFilePpt2Line, RiFileTextLine, RiFolder3Line, RiFolderAddLine, RiInboxLine, RiLayoutGridLine, RiListUnordered, RiSearchLine, RiUploadCloud2Line } from "react-icons/ri";
 
 type FileGridProps = {
   files             : DriveFile[];
@@ -47,7 +47,7 @@ const getExtension = (name: string) => {
 
 const toneForFile = (mimeType: string, name: string) => {
   const ext = getExtension(name);
-  if (mimeType === "application/vnd.google-apps.folder") return "text-(--axis-accent-2)";
+  if (mimeType === "application/vnd.google-apps.folder") return "text-amber-300";
   if (mimeType.startsWith("image/")) return "text-emerald-300";
   if (mimeType.includes("spreadsheet") || ["xls", "xlsx", "csv"].includes(ext)) {
     return "text-emerald-400";
@@ -69,7 +69,7 @@ const toneForFile = (mimeType: string, name: string) => {
 const badgeToneForFile = (mimeType: string, name: string) => {
   const ext = getExtension(name);
   if (mimeType === "application/vnd.google-apps.folder") {
-    return "border-(--axis-border) text-(--axis-accent-2)";
+    return "border-amber-400/30 text-amber-200";
   }
   if (mimeType.startsWith("image/")) return "border-emerald-400/30 text-emerald-200";
   if (mimeType.includes("spreadsheet") || ["xls", "xlsx", "csv"].includes(ext)) {
@@ -88,7 +88,7 @@ const badgeToneForFile = (mimeType: string, name: string) => {
 const bgToneForFile = (mimeType: string, name: string) => {
   const ext = getExtension(name);
   if (mimeType === "application/vnd.google-apps.folder") {
-    return "bg-[color-mix(in_srgb,var(--axis-accent-2)_16%,transparent)]";
+    return "bg-amber-500/12";
   }
   if (mimeType.startsWith("image/")) return "bg-emerald-500/15";
   if (mimeType.includes("spreadsheet") || ["xls", "xlsx", "csv"].includes(ext)) {
@@ -326,20 +326,30 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-4 border-b border-(--axis-border) pb-5">
-        {inFolder && (
-          <div className="flex flex-wrap items-center gap-2 text-sm text-(--axis-muted)">
-            <button
-              type="button"
-              onClick={handleBackToRoot}
-              className="inline-flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-(--axis-text) transition hover:bg-(--axis-surface)"
-            >
-              <RiArrowLeftLine className="h-4 w-4 text-(--axis-accent-2)" aria-hidden />
-              Raíz
-            </button>
-            <span className="text-(--axis-border)">/</span>
-            <span className="truncate font-medium text-(--axis-text)">{currentFolderName ?? "Carpeta"}</span>
-          </div>
-        )}
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <button
+            type="button"
+            onClick={inFolder ? handleBackToRoot : undefined}
+            className={cn(
+              "inline-flex items-center rounded-2xl border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] transition",
+              inFolder
+                ? "border-(--axis-border) bg-(--axis-surface-strong) text-(--axis-text) hover:bg-(--axis-surface)"
+                : "cursor-default border-(--axis-border) bg-(--axis-surface) text-(--axis-muted)",
+            )}
+            aria-current={!inFolder ? "page" : undefined}
+            title={inFolder ? "Volver a Mi Drive" : "Mi Drive"}
+          >
+            Mi Drive
+          </button>
+          {inFolder && (
+            <>
+              <RiArrowRightSLine className="h-4 w-4 text-(--axis-muted)" aria-hidden />
+              <span className="max-w-[60ch] truncate font-medium text-(--axis-text)" aria-current="page">
+                {currentFolderName ?? "Carpeta"}
+              </span>
+            </>
+          )}
+        </div>
 
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative flex-1 lg:max-w-md">
@@ -424,7 +434,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
       </div>
 
       {isBulkDownloadMode && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-(--axis-border) bg-[color-mix(in_srgb,var(--axis-accent)_8%,transparent)] px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted)">
             Seleccion multiple
             {selectedIds.length > 0 ? (
@@ -677,35 +687,11 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                     }
                   }}
                   className={cn(
-                    "group relative flex items-center gap-4 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) p-4 text-left shadow-[0_8px_24px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--axis-accent)_28%,var(--axis-border))] hover:shadow-[0_14px_40px_rgba(15,23,42,0.14)]",
-                    view === "list" && "justify-between",
+                    "group relative flex min-w-0 items-center gap-4 rounded-2xl border border-(--axis-border) bg-(--axis-surface) p-4 text-left shadow-[0_8px_24px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--axis-accent)_28%,var(--axis-border))] hover:bg-(--axis-surface-strong) hover:shadow-[0_14px_40px_rgba(15,23,42,0.14)]",
+                    isBulkDownloadMode && isSelected && "border-(--axis-accent) bg-[color-mix(in_srgb,var(--axis-accent)_10%,var(--axis-surface))]",
                   )}
                 >
-                  {isBulkDownloadMode && (
-                    <div className="absolute bottom-3 right-3 z-10">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleSelection(file.id)}
-                        onPointerDown={(event) => event.stopPropagation()}
-                        onClick={(event) => event.stopPropagation()}
-                        className="h-5 w-5 rounded border-(--axis-border) bg-(--axis-surface) accent-(--axis-accent)"
-                        aria-label={isSelected ? "Deseleccionar" : "Seleccionar"}
-                      />
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      void handleDownloadItems([file.id]);
-                    }}
-                    className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-(--axis-border) bg-(--axis-surface) text-(--axis-muted) shadow-sm transition hover:border-[color-mix(in_srgb,var(--axis-accent)_35%,var(--axis-border))] hover:text-(--axis-accent)"
-                    title="Descargar"
-                  >
-                    <RiDownloadLine className="h-4 w-4" aria-hidden />
-                  </button>
-                  <div className="relative z-10 flex min-w-0 items-center gap-4">
+                  <div className="flex min-w-0 items-center gap-4">
                     <div
                       className={cn(
                         "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ring-1 ring-(--axis-border)",
@@ -714,7 +700,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                     >
                       <Icon className={cn("h-5 w-5", tone)} />
                     </div>
-                    <div className="min-w-0 pr-12">
+                    <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-(--axis-text)">
                         {file.nombre}
                       </p>
@@ -731,11 +717,41 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                       </div>
                     </div>
                   </div>
-                  {view === "list" && !isFolderItem && (
-                    <span className="relative z-10 text-xs text-(--axis-muted)">
-                      {formatSize(file.sizeBytes)}
-                    </span>
-                  )}
+                  <div className="ml-auto flex shrink-0 items-center gap-2">
+                    {view === "list" && !isFolderItem && (
+                      <span className="text-xs text-(--axis-muted)">{formatSize(file.sizeBytes)}</span>
+                    )}
+
+                    {!isBulkDownloadMode && (
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          void handleDownloadItems([file.id]);
+                        }}
+                        className={cn(
+                          "flex h-9 w-9 items-center justify-center rounded-xl border border-(--axis-border) bg-(--axis-surface) text-(--axis-muted) shadow-sm transition hover:border-[color-mix(in_srgb,var(--axis-accent)_35%,var(--axis-border))] hover:text-(--axis-accent)",
+                          view === "grid" && "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
+                        )}
+                        title="Descargar"
+                        aria-label="Descargar"
+                      >
+                        <RiDownloadLine className="h-4 w-4" aria-hidden />
+                      </button>
+                    )}
+
+                    {isBulkDownloadMode && (
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelection(file.id)}
+                        onPointerDown={(event) => event.stopPropagation()}
+                        onClick={(event) => event.stopPropagation()}
+                        className="h-5 w-5 rounded border-(--axis-border) bg-(--axis-surface) accent-(--axis-accent)"
+                        aria-label={isSelected ? "Deseleccionar" : "Seleccionar"}
+                      />
+                    )}
+                  </div>
                 </div>
               );
             })}
