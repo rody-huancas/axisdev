@@ -2,10 +2,11 @@
 
 import { auth } from "@/auth";
 import type { GoogleGmailListResponse, GoogleGmailMessage } from "@/types/google";
+import { env } from "@/lib/env";
 
-const gmailListEndpoint = "https://gmail.googleapis.com/gmail/v1/users/me/messages";
+const gmailListEndpoint = `${env.api.gmail}/messages`;
 
-const gmailMessageEndpoint = (messageId: string) => `https://gmail.googleapis.com/gmail/v1/users/me/messages/${messageId}`;
+const gmailMessageEndpoint = (messageId: string) => `${env.api.gmail}/messages/${messageId}`;
 
 const fetchMessage = async (accessToken: string, messageId: string) => {
   const url = new URL(gmailMessageEndpoint(messageId));

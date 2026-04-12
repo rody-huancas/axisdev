@@ -1,8 +1,9 @@
 "use server";
 
 import { auth } from "@/auth";
+import { env } from "@/lib/env";
 
-const driveEndpoint = "https://www.googleapis.com/drive/v3/files";
+const driveEndpoint = env.api.drive;
 
 type CreateFolderInput = {
   name: string;

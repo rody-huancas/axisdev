@@ -2,8 +2,9 @@
 
 import { auth } from "@/auth";
 import type { GoogleTasksResponse } from "@/types/google";
+import { env } from "@/lib/env";
 
-const tasksEndpoint = "https://tasks.googleapis.com/tasks/v1/lists/@default/tasks";
+const tasksEndpoint = env.api.tasks;
 
 export const getTasksPreview = async (): Promise<GoogleTasksResponse> => {
   const session = await auth();
