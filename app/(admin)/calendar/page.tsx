@@ -13,6 +13,7 @@ type ApiEvent = {
   htmlLink   ?: string | null;
   location   ?: string | null;
   description?: string | null;
+  attendees  ?: string[];
 };
 
 const calendarEndpoint = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
@@ -53,7 +54,7 @@ const CalendarPage = async () => {
   url.searchParams.set("maxResults", "2500");
   url.searchParams.set("timeMin", start.toISOString());
   url.searchParams.set("timeMax", end.toISOString());
-  url.searchParams.set("fields", "items(id,summary,start,end,hangoutLink,conferenceData,htmlLink,location,description)");
+  url.searchParams.set("fields", "items(id,summary,start,end,hangoutLink,conferenceData,htmlLink,location,description,attendees(email,displayName,responseStatus))");
 
   const response = await fetch(url.toString(), {
     headers: {
@@ -74,6 +75,7 @@ const CalendarPage = async () => {
           htmlLink      ?: string;
           location      ?: string;
           description   ?: string;
+          attendees     ?: Array<{ email?: string; displayName?: string; responseStatus?: string }>;
         }>;
       })
     :  { items: [] };
@@ -87,6 +89,7 @@ const CalendarPage = async () => {
     htmlLink   : event.htmlLink ?? null,
     location   : event.location ?? null,
     description: event.description ?? null,
+    attendees  : (event.attendees ?? []).map((attendee) => attendee.email).filter(Boolean) as string[],
   }));
 
   return (
