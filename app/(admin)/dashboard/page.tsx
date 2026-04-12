@@ -98,16 +98,16 @@ const DashboardPage = async () => {
     <section className="space-y-6">
       <DashboardHeader userName={userName} userEmail={userEmail} userImage={userImage} />
 
-      <section className="grid gap-6 pt-28 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="space-y-6">
-          <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#6C63FF] via-[#5A7BFF] to-[#4DA2FF] p-8 text-white shadow-[0_18px_36px_rgba(108,99,255,0.28)]">
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="space-y-6 min-w-0">
+          <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#6C63FF] via-[#5A7BFF] to-[#4DA2FF] p-6 text-white shadow-[0_18px_36px_rgba(108,99,255,0.28)] sm:p-8">
             <div className="absolute -right-10 top-6 h-32 w-32 rounded-full bg-white/20 blur-2xl" />
             <div className="absolute right-16 top-16 h-20 w-20 rounded-3xl border border-white/20" />
             <div className="absolute bottom-0 left-0 h-28 w-28 -translate-x-8 translate-y-8 rounded-full bg-white/10" />
             <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div className="max-w-lg space-y-3">
                 <p className="text-xs uppercase tracking-[0.3em] text-white/70">AxisDev</p>
-                <h2 className="text-3xl font-semibold">
+                <h2 className="text-2xl font-semibold sm:text-3xl">
                   Tu centro inteligente de Google Workspace
                 </h2>
                 <p className="text-sm text-white/80">
@@ -127,7 +127,7 @@ const DashboardPage = async () => {
             {storageBreakdown.map((item) => (
               <div
                 key={item.label}
-                className="rounded-3xl border bg-(--axis-surface) p-5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] transition hover:-translate-y-1"
+                className="rounded-3xl border bg-(--axis-surface) p-5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 overflow-hidden"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -180,7 +180,7 @@ const DashboardPage = async () => {
                   }))).map((course) => (
                 <div
                   key={course.title}
-                  className="group rounded-3xl border bg-(--axis-surface) p-5 shadow-[0_12px_28px_rgba(15,23,42,0.08)] transition hover:-translate-y-1"
+                  className="group rounded-3xl border bg-(--axis-surface) p-5 shadow-[0_12px_28px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 overflow-hidden"
                 >
                   <div className="flex items-center gap-4">
                     <div
@@ -188,15 +188,15 @@ const DashboardPage = async () => {
                     >
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.45),transparent)]" />
                     </div>
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="rounded-full bg-(--axis-surface-strong) px-2 py-1 text-[10px] font-semibold text-(--axis-muted)">
-                          {course.category}
-                        </span>
-                        <span className="text-[10px] text-(--axis-muted)">{course.lessons}</span>
+                    <div className="flex-1 min-w-0 space-y-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="rounded-full bg-(--axis-surface-strong) px-2 py-1 text-[10px] font-semibold text-(--axis-muted)">
+                      {course.category}
+                    </span>
+                        <span className="text-[10px] text-(--axis-muted) truncate">{course.lessons}</span>
                       </div>
-                      <p className="text-sm font-semibold text-(--axis-text)">{course.title}</p>
-                      <p className="text-xs text-(--axis-muted)">{course.mentor}</p>
+                      <p className="text-sm font-semibold text-(--axis-text) truncate">{course.title}</p>
+                      <p className="text-xs text-(--axis-muted) truncate">{course.mentor}</p>
                       <div className="mt-2 h-2 rounded-full bg-(--axis-surface-strong)">
                         <div
                           className="h-2 rounded-full bg-linear-to-r from-indigo-500 to-sky-500"
@@ -211,8 +211,8 @@ const DashboardPage = async () => {
           </div>
         </div>
 
-        <aside className="space-y-6">
-          <div className="rounded-3xl border bg-(--axis-surface) p-6 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
+        <aside className="space-y-6 min-w-0">
+          <div className="rounded-3xl border bg-(--axis-surface) p-6 shadow-[0_12px_28px_rgba(15,23,42,0.08)] overflow-hidden">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-(--axis-muted)">Resumen</p>
@@ -238,7 +238,7 @@ const DashboardPage = async () => {
             </div>
           </div>
 
-          <div className="rounded-3xl border bg-(--axis-surface) p-6 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
+          <div className="rounded-3xl border bg-(--axis-surface) p-6 shadow-[0_12px_28px_rgba(15,23,42,0.08)] overflow-hidden">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-(--axis-text)">Ultimos correos</h3>
               <button className="text-xs font-semibold text-indigo-500" type="button">
@@ -274,7 +274,7 @@ const DashboardPage = async () => {
             </div>
           </div>
 
-          <div className="rounded-3xl border bg-(--axis-surface) p-6 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
+          <div className="rounded-3xl border bg-(--axis-surface) p-6 shadow-[0_12px_28px_rgba(15,23,42,0.08)] overflow-hidden">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-(--axis-text)">Tareas pendientes</h3>
               <button className="text-xs font-semibold text-indigo-500" type="button">
@@ -287,11 +287,11 @@ const DashboardPage = async () => {
                   key={task.id}
                   className="flex items-center justify-between rounded-2xl border bg-(--axis-surface-strong) px-3 py-3"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-linear-to-br from-emerald-200 via-cyan-200 to-sky-200" />
-                    <div>
-                      <p className="text-xs font-semibold text-(--axis-text)">{task.titulo}</p>
-                      <p className="text-[10px] text-(--axis-muted)">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-(--axis-text) truncate">{task.titulo}</p>
+                      <p className="text-[10px] text-(--axis-muted) truncate">
                         {task.vence ? `Vence: ${task.vence}` : "Sin fecha"}
                       </p>
                     </div>
