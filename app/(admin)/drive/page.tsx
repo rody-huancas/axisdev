@@ -32,7 +32,7 @@ const DrivePage = async ({ searchParams }: DrivePageProps) => {
         userImage={session.user?.image ?? null}
       />
 
-      <section className="space-y-6 pt-28">
+      <section className="space-y-6">
         <div className="rounded-3xl border border-(--axis-border) bg-(--axis-surface) px-6 py-5 shadow-[0_10px_24px_rgba(15,23,42,0.12)]">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>

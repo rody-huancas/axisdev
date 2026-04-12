@@ -1,24 +1,33 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 
 export const UserAuthForm = () => {
   const [isPending, startTransition] = useTransition();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const handleGoogle = () => {
+    if (isRedirecting) {
+      return;
+    }
+
+    setIsRedirecting(true);
     startTransition(() => {
-      void signIn("google", { callbackUrl: "/dashboard" });
+      void signIn("google", { callbackUrl: "/dashboard" }).catch(() => {
+        setIsRedirecting(false);
+      });
     });
   };
 
   return (
     <div className="w-full">
       <Button
-        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:bg-slate-50"
-        disabled={isPending}
+        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:bg-slate-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:bg-white"
+        disabled={isPending || isRedirecting}
         onClick={handleGoogle}
+        aria-busy={isPending || isRedirecting}
       >
         <span className="flex items-center justify-center gap-3">
           <svg
@@ -43,7 +52,14 @@ export const UserAuthForm = () => {
               d="M43.611 20.083H42V20H24v8h11.303c-.792 2.235-2.231 4.155-4.126 5.508l.003-.002 6.157 5.209C36.903 39.455 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"
             />
           </svg>
-          <span>{isPending ? "Conectando..." : "Continuar con Google"}</span>
+          {isPending || isRedirecting ? (
+            <span className="flex items-center gap-2">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900" />
+              <span>Conectando...</span>
+            </span>
+          ) : (
+            <span>Continuar con Google</span>
+          )}
         </span>
       </Button>
     </div>
