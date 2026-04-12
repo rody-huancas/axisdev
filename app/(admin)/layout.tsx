@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AdminSidebar } from "@/components/dashboard/admin-sidebar";
+import { AdminShell } from "@/components/dashboard/admin-shell";
 
 const AdminLayout = async ({ children }: Readonly<{ children: ReactNode }>) => {
   const session = await auth();
@@ -11,12 +11,7 @@ const AdminLayout = async ({ children }: Readonly<{ children: ReactNode }>) => {
   }
 
   return (
-    <div className="min-h-screen bg-(--axis-bg) text-(--axis-text)">
-      <AdminSidebar />
-      <main className="min-h-screen px-5 pb-10 pt-24 lg:ml-72 lg:px-10 lg:pt-10">
-        {children}
-      </main>
-    </div>
+    <AdminShell>{children}</AdminShell>
   );
 };
 
