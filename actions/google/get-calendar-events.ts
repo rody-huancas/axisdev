@@ -3,8 +3,9 @@
 import { auth } from "@/auth";
 import { calendarEventsQuerySchema } from "@/lib/validations/google";
 import type { GoogleCalendarEventsResponse } from "@/types/google";
+import { env } from "@/lib/env";
 
-const calendarEndpoint = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
+const calendarEndpoint = env.api.calendar;
 
 type CalendarEventsInput = {
   timeMin   ?: string;

@@ -1,8 +1,9 @@
 "use server";
 
 import { auth } from "@/auth";
+import { env } from "@/lib/env";
 
-const uploadEndpoint = "https://www.googleapis.com/upload/drive/v3/files";
+const uploadEndpoint = env.api.driveUpload;
 
 type UploadDriveFileInput = {
   file: File;

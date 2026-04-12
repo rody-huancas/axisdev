@@ -2,8 +2,9 @@
 
 import { auth } from "@/auth";
 import type { GoogleDriveFilesResponse } from "@/types/google";
+import { env } from "@/lib/env";
 
-const driveEndpoint = "https://www.googleapis.com/drive/v3/files";
+const driveEndpoint = env.api.drive;
 
 export const getRecentDriveFiles = async (): Promise<GoogleDriveFilesResponse> => {
   const session = await auth();
