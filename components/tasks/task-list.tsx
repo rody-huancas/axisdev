@@ -6,13 +6,23 @@ import { RiCheckboxCircleLine, RiCheckboxLine } from "react-icons/ri";
 type TaskItemProps = {
   task: TareaPendiente;
   onToggle: (id: string, completed: boolean) => void;
+  onSelect?: (task: TareaPendiente) => void;
 };
 
-export const TaskItem = ({ task, onToggle }: TaskItemProps) => {
+export const TaskItem = ({ task, onToggle, onSelect }: TaskItemProps) => {
   const isCompleted = task.estado === "completada";
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onSelect?.(task)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect?.(task);
+        }
+      }}
       className={cn(
         "group flex items-start gap-4 rounded-2xl border border-border bg-surface p-4 text-left shadow-[0_8px_24px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--axis-accent)_28%,var(--axis-border))] hover:bg-surface-strong hover:shadow-[0_14px_40px_rgba(15,23,42,0.14)]",
         isCompleted && "opacity-60",
@@ -20,7 +30,10 @@ export const TaskItem = ({ task, onToggle }: TaskItemProps) => {
     >
       <button
         type="button"
-        onClick={() => onToggle(task.id, !isCompleted)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle(task.id, !isCompleted);
+        }}
         className={cn(
           "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 transition",
           isCompleted
@@ -63,9 +76,10 @@ export const TaskItem = ({ task, onToggle }: TaskItemProps) => {
 type TaskListProps = {
   tasks: TareaPendiente[];
   onToggle: (id: string, completed: boolean) => void;
+  onSelect?: (task: TareaPendiente) => void;
 };
 
-export const TaskList = ({ tasks, onToggle }: TaskListProps) => {
+export const TaskList = ({ tasks, onToggle, onSelect }: TaskListProps) => {
   if (!tasks.length) {
     return (
       <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-[color-mix(in_srgb,var(--axis-bg)_40%,transparent)] px-6 py-16 text-center">
@@ -81,7 +95,7 @@ export const TaskList = ({ tasks, onToggle }: TaskListProps) => {
   return (
     <div className="grid gap-3">
       {tasks.map((task) => (
-        <TaskItem key={task.id} task={task} onToggle={onToggle} />
+        <TaskItem key={task.id} task={task} onToggle={onToggle} onSelect={onSelect} />
       ))}
     </div>
   );

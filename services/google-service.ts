@@ -35,6 +35,7 @@ export type TareaPendiente = {
   titulo : string;
   estado : "completada" | "pendiente";
   vence ?: string;
+  descripcion?: string;
 };
 
 export type GmailMensaje = {
