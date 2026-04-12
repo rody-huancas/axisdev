@@ -228,8 +228,8 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
       {isDetailOpen && selected && (
         <div className="fixed inset-0 z-50">
           <div className="fixed inset-0 bg-black/60" onClick={() => setIsDetailOpen(false)} />
-          <div className="relative z-10 flex min-h-dvh items-center justify-center p-4">
-            <div className="w-full max-w-3xl overflow-hidden rounded-3xl border border-(--axis-border) bg-(--axis-surface) shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
+          <div className="relative z-10 flex h-dvh items-center justify-center p-4">
+            <div className="w-full max-w-5xl overflow-hidden rounded-3xl border border-(--axis-border) bg-(--axis-surface) shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
               <div className="flex items-start justify-between gap-4 border-b border-(--axis-border) px-6 py-5">
                 <div className="min-w-0 flex-1">
                   <p className="text-xs uppercase tracking-[0.3em] text-(--axis-accent)">Mensaje</p>
@@ -246,7 +246,7 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
                 </button>
               </div>
 
-              <div className="max-h-[70dvh] overflow-auto px-6 py-5">
+              <div className="max-h-[55dvh] overflow-y-auto px-6 py-5">
                 {selected.htmlContent ? (
                   <div className="prose prose-invert prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: selected.htmlContent }} />
                 ) : (
@@ -254,7 +254,7 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
                 )}
               </div>
 
-              <div className="flex items-center justify-between gap-3 border-t border-(--axis-border) bg-(--axis-surface) px-6 py-4">
+              <div className="shrink-0 flex items-center justify-between gap-3 border-t border-(--axis-border) bg-(--axis-surface) px-6 py-4">
                 <div className="flex gap-2">
                   <button
                     type="button"
