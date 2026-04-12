@@ -10,7 +10,7 @@ const googleScopes = [
   `${env.api.google}/auth/calendar.events`,
   `${env.api.google}/auth/drive.file`,
   `${env.api.google}/auth/drive.readonly`,
-  `${env.api.google}/auth/tasks.readonly`,
+  `${env.api.google}/auth/tasks`,
   `${env.api.google}/auth/gmail.readonly`,
 ].join(" ");
 
