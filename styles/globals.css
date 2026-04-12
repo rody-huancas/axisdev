@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "react-big-calendar/lib/css/react-big-calendar.css";
 
 :root {
   color-scheme: dark;
@@ -53,4 +54,94 @@
     color: var(--axis-text);
     font-family: var(--font-poppins);
   }
+}
+
+.axis-rbc .rbc-calendar {
+  color: var(--axis-text);
+}
+
+.axis-rbc .rbc-toolbar {
+  position: relative;
+  z-index: 2;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.axis-rbc .rbc-toolbar button {
+  cursor: pointer;
+  border-radius: 14px;
+  border: 1px solid var(--axis-border);
+  background: var(--axis-surface);
+  color: var(--axis-text);
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.axis-rbc .rbc-toolbar button:hover {
+  background: var(--axis-surface-strong);
+}
+
+.axis-rbc .rbc-toolbar button.rbc-active,
+.axis-rbc .rbc-toolbar button.rbc-active:hover {
+  background: var(--axis-accent);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.axis-rbc .rbc-month-view,
+.axis-rbc .rbc-time-view,
+.axis-rbc .rbc-agenda-view {
+  border: 1px solid var(--axis-border);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.axis-rbc .rbc-header {
+  background: var(--axis-surface-strong);
+  color: var(--axis-muted);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--axis-border);
+  padding: 10px 8px;
+}
+
+.axis-rbc .rbc-off-range-bg {
+  background: color-mix(in srgb, var(--axis-bg) 75%, transparent);
+}
+
+.axis-rbc .rbc-day-bg + .rbc-day-bg {
+  border-left: 1px solid var(--axis-border);
+}
+
+.axis-rbc .rbc-month-row + .rbc-month-row {
+  border-top: 1px solid var(--axis-border);
+}
+
+.axis-rbc .rbc-event {
+  background: var(--axis-accent);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.axis-rbc .rbc-event.rbc-selected {
+  background: var(--axis-accent-2);
+}
+
+.axis-rbc .rbc-today {
+  background: color-mix(in srgb, var(--axis-accent) 14%, transparent);
+}
+
+.axis-rbc .rbc-time-content,
+.axis-rbc .rbc-time-header-content {
+  border-top: 1px solid var(--axis-border);
+}
+
+.axis-rbc .rbc-timeslot-group {
+  border-bottom: 1px solid var(--axis-border);
 }

@@ -6,7 +6,7 @@ const googleScopes = [
   "openid",
   "email",
   "profile",
-  "https://www.googleapis.com/auth/calendar.readonly",
+  "https://www.googleapis.com/auth/calendar.events",
   "https://www.googleapis.com/auth/drive.file",
   "https://www.googleapis.com/auth/drive.readonly",
   "https://www.googleapis.com/auth/tasks.readonly",
@@ -14,17 +14,17 @@ const googleScopes = [
 ].join(" ");
 
 export const authConfig = {
-  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  secret   : process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   trustHost: true,
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      clientId     : process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret : process.env.GOOGLE_CLIENT_SECRET ?? "",
       authorization: {
         params: {
-          scope: googleScopes,
+          scope      : googleScopes,
           access_type: "offline",
-          prompt: "consent",
+          prompt     : "consent",
         },
       },
     }),
