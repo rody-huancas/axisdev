@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { sileo } from "sileo";
 import { cn } from "@/lib/utils";
 import type { GmailMensaje } from "@/services/google-service";
-import { RiArrowLeftLine, RiDeleteBin6Line, RiInboxLine, RiMailForwardsLine, RiMailLine, RiMoreFill, RiRefreshLine, RiReplyLine, RiSearchLine, RiSpamLine, RiStarLine, RiTimeLine } from "react-icons/ri";
+import { RiArrowLeftLine, RiDeleteBin6Line, RiInboxLine, RiMailLine, RiRefreshLine, RiReplyLine, RiSearchLine, RiSpamLine, RiStarLine, RiTimeLine } from "react-icons/ri";
 
 type GmailClientProps = {
   initialItems: GmailMensaje[];
@@ -268,7 +268,7 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
                     type="button"
                     className="flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--axis-text) transition hover:bg-(--axis-surface)"
                   >
-                    <RiMailForwardsLine className="h-4 w-4" />
+                    <RiReplyLine className="h-4 w-4 rotate-180" />
                     Reenviar
                   </button>
                 </div>
