@@ -11,6 +11,7 @@ type CalendarApiEvent = {
   htmlLink?: string | null;
   location?: string | null;
   description?: string | null;
+  attendees?: string[];
 };
 
 const calendarEndpoint = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
@@ -70,7 +71,7 @@ export async function GET(request: Request) {
   url.searchParams.set("singleEvents", "true");
   url.searchParams.set("orderBy", "startTime");
   url.searchParams.set("maxResults", "2500");
-  url.searchParams.set("fields", "items(id,summary,start,end,hangoutLink,conferenceData,htmlLink,location,description)");
+  url.searchParams.set("fields", "items(id,summary,start,end,hangoutLink,conferenceData,htmlLink,location,description,attendees(email,displayName,responseStatus))");
   if (start) url.searchParams.set("timeMin", start);
   if (end) url.searchParams.set("timeMax", end);
 
@@ -96,6 +97,7 @@ export async function GET(request: Request) {
       htmlLink?: string;
       location?: string;
       description?: string;
+      attendees?: Array<{ email?: string; displayName?: string; responseStatus?: string }>;
     }>;
   };
 
@@ -111,6 +113,7 @@ export async function GET(request: Request) {
       htmlLink: event.htmlLink ?? null,
       location: event.location ?? null,
       description: event.description ?? null,
+      attendees: (event.attendees ?? []).map((attendee) => attendee.email).filter(Boolean) as string[],
     } satisfies CalendarApiEvent;
   });
 
@@ -146,16 +149,21 @@ export async function POST(request: Request) {
   const insertUrl = new URL(calendarEndpoint);
   insertUrl.searchParams.set("conferenceDataVersion", "1");
 
+  const attendees = (body.attendees ?? [])
+    .map((email) => email.trim())
+    .filter(Boolean);
+
+  if (attendees.length) {
+    insertUrl.searchParams.set("sendUpdates", "all");
+  }
+
   const payload: any = {
     summary: title,
     description: body.description?.trim() || undefined,
     location: body.location?.trim() || undefined,
     start: { dateTime: start },
     end: { dateTime: end },
-    attendees: (body.attendees ?? [])
-      .map((email) => email.trim())
-      .filter(Boolean)
-      .map((email) => ({ email })),
+    attendees: attendees.map((email) => ({ email })),
   };
 
   if (body.createMeet) {
@@ -184,6 +192,10 @@ export async function POST(request: Request) {
   const created = (await response.json()) as any;
   const createdStart = toIso(created?.start?.dateTime, created?.start?.date);
   const createdEnd = toEndIso(created?.end?.dateTime, created?.end?.date);
+
+  const createdAttendees = (created?.attendees ?? []) as Array<{ email?: string }>;
+  const attendeeEmails = (createdAttendees.length ? createdAttendees.map((a) => a.email) : attendees).filter(Boolean) as string[];
+
   const item: CalendarApiEvent = {
     id: created?.id,
     title: created?.summary ?? title,
@@ -193,6 +205,7 @@ export async function POST(request: Request) {
     htmlLink: created?.htmlLink ?? null,
     location: created?.location ?? null,
     description: created?.description ?? null,
+    attendees: attendeeEmails,
   };
 
   return Response.json({ item });
