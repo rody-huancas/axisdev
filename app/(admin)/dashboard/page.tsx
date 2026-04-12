@@ -2,8 +2,10 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { DriveBreakdownChart } from "@/components/dashboard/drive-breakdown-chart";
 import { LearningCharts } from "@/components/dashboard/learning-charts";
-import { fetchCalendarEvents, fetchGmailPreview, fetchRecentFiles, fetchStorageInfo, fetchTasksPreview } from "@/services/google-service";
+import { TaskStatusChart } from "@/components/dashboard/task-status-chart";
+import { fetchCalendarEvents, fetchGmailPreview, fetchGmailUnreadCount, fetchRecentFiles, fetchStorageInfo, fetchTasksPreview } from "@/services/google-service";
 
 const DashboardPage = async () => {
   const session = await auth();
@@ -16,18 +18,20 @@ const DashboardPage = async () => {
   const userEmail = session?.user?.email ?? null;
   const userImage = session?.user?.image ?? null;
 
-  const [filesResult, eventsResult, storageResult, tasksResult, gmailResult] = await Promise.all([
+  const [filesResult, eventsResult, storageResult, tasksResult, gmailResult, gmailUnreadResult] = await Promise.all([
     fetchRecentFiles(),
     fetchCalendarEvents(),
     fetchStorageInfo(),
     fetchTasksPreview(),
     fetchGmailPreview(),
+    fetchGmailUnreadCount(),
   ]);
 
   const driveFiles = filesResult.ok ? filesResult.data : [];
   const calendarEvents = eventsResult.ok ? eventsResult.data : [];
   const tasks = tasksResult.ok ? tasksResult.data : [];
   const gmailMessages = gmailResult.ok ? gmailResult.data : [];
+  const gmailUnreadCount = gmailUnreadResult.ok ? gmailUnreadResult.data : 0;
   const storageInfo = storageResult.ok
     ? storageResult.data
     : { usadoGb: 0, limiteGb: 0, porcentaje: 0 };
@@ -81,24 +85,27 @@ const DashboardPage = async () => {
     };
   });
 
-  const weeklyBars = calendarEvents.length
-    ? Array.from({ length: 7 }).map((_, index) => {
-        const date = new Date();
-        
-        date.setDate(date.getDate() - (6 - index));
-        
-        const day   = date.toISOString().split("T")[0];
-        const count = calendarEvents.filter((event) => event.inicioIso.startsWith(day)).length;
+  const weeklyBars = Array.from({ length: 7 }).map((_, index) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - index));
 
-        return count;
-      })
-    : [3, 5, 4, 6, 5, 7, 6];
+    const day = date.toISOString().split("T")[0];
+    return calendarEvents.filter((event) => event.inicioIso.startsWith(day)).length;
+  });
+
+  const pendingTasks = tasks.filter((task) => task.estado !== "completada");
+  const completedTasks = tasks.filter((task) => task.estado === "completada");
+
+  const driveBreakdownChart = storageBreakdown.map((item) => ({
+    label: item.label,
+    value: item.percentage,
+  }));
 
   return (
     <section className="space-y-6">
       <DashboardHeader userName={userName} userEmail={userEmail} userImage={userImage} />
 
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-6 min-w-0">
           <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#6C63FF] via-[#5A7BFF] to-[#4DA2FF] p-6 text-white shadow-[0_18px_36px_rgba(108,99,255,0.28)] sm:p-8">
             <div className="absolute -right-10 top-6 h-32 w-32 rounded-full bg-white/20 blur-2xl" />
@@ -123,7 +130,7 @@ const DashboardPage = async () => {
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {storageBreakdown.map((item) => (
               <div
                 key={item.label}
@@ -146,6 +153,19 @@ const DashboardPage = async () => {
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-3xl border bg-(--axis-surface) p-5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] overflow-hidden">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-(--axis-muted)">Correos</p>
+              <p className="mt-3 text-3xl font-semibold text-(--axis-text)">{gmailUnreadCount}</p>
+              <p className="mt-1 text-xs text-(--axis-muted)">Sin leer en Inbox</p>
+            </div>
+            <div className="rounded-3xl border bg-(--axis-surface) p-5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] overflow-hidden">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-(--axis-muted)">Tareas</p>
+              <p className="mt-3 text-3xl font-semibold text-(--axis-text)">{pendingTasks.length}</p>
+              <p className="mt-1 text-xs text-(--axis-muted)">Pendientes</p>
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -182,17 +202,17 @@ const DashboardPage = async () => {
                   key={course.title}
                   className="group rounded-3xl border bg-(--axis-surface) p-5 shadow-[0_12px_28px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 overflow-hidden"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                     <div
-                      className={`relative h-20 w-20 overflow-hidden rounded-2xl bg-linear-to-br ${course.tone}`}
+                      className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-linear-to-br ${course.tone} sm:h-20 sm:w-20`}
                     >
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.45),transparent)]" />
                     </div>
                     <div className="flex-1 min-w-0 space-y-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="rounded-full bg-(--axis-surface-strong) px-2 py-1 text-[10px] font-semibold text-(--axis-muted)">
-                      {course.category}
-                    </span>
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <span className="rounded-full bg-(--axis-surface-strong) px-2 py-1 text-[10px] font-semibold text-(--axis-muted)">
+                          {course.category}
+                        </span>
                         <span className="text-[10px] text-(--axis-muted) truncate">{course.lessons}</span>
                       </div>
                       <p className="text-sm font-semibold text-(--axis-text) truncate">{course.title}</p>
@@ -219,9 +239,9 @@ const DashboardPage = async () => {
                 <p className="mt-2 text-lg font-semibold text-(--axis-text)">Buenos dias, {userName}</p>
                 <p className="text-xs text-(--axis-muted)">Eventos de la semana</p>
               </div>
-              <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-semibold text-emerald-600">
-                {calendarEvents.length}+ eventos
-              </span>
+               <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-semibold text-emerald-600">
+                 {calendarEvents.length}+ eventos
+               </span>
             </div>
 
             <div className="mt-6">
@@ -235,6 +255,35 @@ const DashboardPage = async () => {
               <p className="text-xs text-(--axis-muted)">
                 Limite: {storageInfo.limiteGb} GB
               </p>
+            </div>
+          </div>
+
+          <div className="rounded-3xl border bg-(--axis-surface) p-6 shadow-[0_12px_28px_rgba(15,23,42,0.08)] overflow-hidden">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-(--axis-muted)">Drive</p>
+                <p className="mt-2 text-lg font-semibold text-(--axis-text)">Distribucion</p>
+                <p className="text-xs text-(--axis-muted)">Archivos recientes</p>
+              </div>
+            </div>
+            <div className="mt-6">
+              <DriveBreakdownChart items={driveBreakdownChart} />
+            </div>
+          </div>
+
+          <div className="rounded-3xl border bg-(--axis-surface) p-6 shadow-[0_12px_28px_rgba(15,23,42,0.08)] overflow-hidden">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-(--axis-muted)">Tasks</p>
+                <p className="mt-2 text-lg font-semibold text-(--axis-text)">Estado</p>
+                <p className="text-xs text-(--axis-muted)">Ultimas tareas</p>
+              </div>
+              <span className="rounded-full bg-(--axis-surface-strong) px-3 py-1 text-[10px] font-semibold text-(--axis-muted)">
+                {tasks.length}
+              </span>
+            </div>
+            <div className="mt-6">
+              <TaskStatusChart pending={pendingTasks.length} completed={completedTasks.length} />
             </div>
           </div>
 
