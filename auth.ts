@@ -1,25 +1,26 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import type { NextAuthConfig } from "next-auth";
+import { env } from "@/lib/env";
 
 const googleScopes = [
   "openid",
   "email",
   "profile",
-  "https://www.googleapis.com/auth/calendar.events",
-  "https://www.googleapis.com/auth/drive.file",
-  "https://www.googleapis.com/auth/drive.readonly",
-  "https://www.googleapis.com/auth/tasks.readonly",
-  "https://www.googleapis.com/auth/gmail.readonly",
+  `${env.api.google}/auth/calendar.events`,
+  `${env.api.google}/auth/drive.file`,
+  `${env.api.google}/auth/drive.readonly`,
+  `${env.api.google}/auth/tasks.readonly`,
+  `${env.api.google}/auth/gmail.readonly`,
 ].join(" ");
 
 export const authConfig = {
-  secret   : process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  secret   : env.auth.secret,
   trustHost: true,
   providers: [
     Google({
-      clientId     : process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret : process.env.GOOGLE_CLIENT_SECRET ?? "",
+      clientId     : env.google.clientId,
+      clientSecret : env.google.clientSecret,
       authorization: {
         params: {
           scope      : googleScopes,
