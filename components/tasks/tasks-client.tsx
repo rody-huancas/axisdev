@@ -198,7 +198,7 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="relative flex-1 lg:max-w-md">
-          <RiSearchLine className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden />
+          <RiSearchLine className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-(--axis-muted)" aria-hidden />
           <input
             value={query}
             onChange={(e) => {
@@ -206,7 +206,7 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
               setPage(1);
             }}
             placeholder="Buscar tareas..."
-            className="w-full rounded-2xl border border-border bg-surface-strong py-3 pl-11 pr-4 text-sm text-text placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+            className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) py-3 pl-11 pr-4 text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:border-(--axis-accent) focus:outline-none focus:ring-2 focus:ring-(--axis-accent)/20"
           />
         </div>
         <div className="flex gap-2">
@@ -214,15 +214,15 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
             type="button"
             onClick={handleRefresh}
             disabled={isLoading}
-            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-surface-strong text-muted transition hover:bg-surface hover:text-accent disabled:opacity-50"
-            title=" Actualizar"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) text-(--axis-muted) transition hover:bg-(--axis-surface) hover:text-(--axis-accent) disabled:opacity-50"
+            title="Actualizar"
           >
             <RiRefreshLine className={cn("h-5 w-5", isLoading && "animate-spin")} />
           </button>
           <button
             type="button"
             onClick={openCreate}
-            className="flex items-center gap-2 rounded-2xl bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:opacity-90"
+            className="flex items-center gap-2 rounded-2xl bg-(--axis-accent) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:opacity-90"
           >
             <RiAddLine className="h-4 w-4" />
             Nueva
@@ -230,7 +230,7 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-1 rounded-2xl border border-border bg-surface-strong p-1">
+      <div className="flex flex-wrap gap-1 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) p-1">
         {(["all", "pendiente", "completada"] as const).map((value) => (
           <button
             key={value}
@@ -242,8 +242,8 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
             className={cn(
               "rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition",
               status === value
-                ? "bg-surface text-text shadow-sm ring-1 ring-border"
-                : "text-muted hover:text-text",
+                ? "bg-(--axis-surface) text-(--axis-text) shadow-sm ring-1 ring-(--axis-border)"
+                : "text-(--axis-muted) hover:text-(--axis-text)",
             )}
           >
             {value === "all" ? "Todas" : value === "pendiente" ? "Pendientes" : "Completadas"}
@@ -261,18 +261,18 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1 || isLoading}
-            className="rounded-2xl border border-border bg-surface-strong px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-text transition hover:bg-surface disabled:opacity-50"
+            className="rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-(--axis-text) transition hover:bg-(--axis-surface) disabled:opacity-50"
           >
             Anterior
           </button>
-          <span className="text-xs text-muted">
+          <span className="text-xs text-(--axis-muted)">
             {page} / {totalPages}
           </span>
           <button
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages || isLoading}
-            className="rounded-2xl border border-border bg-surface-strong px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-text transition hover:bg-surface disabled:opacity-50"
+            className="rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-(--axis-text) transition hover:bg-(--axis-surface) disabled:opacity-50"
           >
             Siguiente
           </button>
@@ -283,13 +283,13 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
         <div className="fixed inset-0 z-50">
           <div className="fixed inset-0 bg-black/60" onClick={() => !isLoading && setIsCreateOpen(false)} />
           <div className="relative z-10 flex h-dvh items-center justify-center p-4">
-            <div className="w-full max-w-md overflow-hidden rounded-3xl border border-border bg-surface shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
-              <div className="flex items-center justify-between border-b border-border px-6 py-4">
-                <h3 className="text-lg font-semibold text-text">Nueva tarea</h3>
+            <div className="w-full max-w-md overflow-hidden rounded-3xl border border-(--axis-border) bg-(--axis-surface) shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
+              <div className="flex items-center justify-between border-b border-(--axis-border) px-6 py-4">
+                <h3 className="text-lg font-semibold text-(--axis-text)">Nueva tarea</h3>
                 <button
                   type="button"
                   onClick={() => setIsCreateOpen(false)}
-                  className="flex h-9 w-9 items-center justify-center rounded-2xl border border-border bg-surface-strong text-muted transition hover:bg-surface hover:text-text"
+                  className="flex h-9 w-9 items-center justify-center rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) text-(--axis-muted) transition hover:bg-(--axis-surface) hover:text-(--axis-text)"
                 >
                   <RiCloseLine className="h-5 w-5" />
                 </button>
@@ -299,19 +299,19 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="Titulo de la tarea"
-                  className="w-full rounded-2xl border border-border bg-surface-strong px-4 py-3 text-sm text-text placeholder:text-muted focus:border-accent focus:outline-none"
+                  className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3 text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:border-(--axis-accent) focus:outline-none"
                 />
                 <input
                   type="date"
                   value={newDue}
                   onChange={(e) => setNewDue(e.target.value)}
-                  className="w-full rounded-2xl border border-border bg-surface-strong px-4 py-3 text-sm text-text focus:border-accent focus:outline-none"
+                  className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3 text-sm text-(--axis-text) focus:border-(--axis-accent) focus:outline-none"
                 />
                 <div className="flex justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setIsCreateOpen(false)}
-                    className="rounded-2xl border border-border px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-muted transition hover:bg-surface-strong"
+                    className="rounded-2xl border border-(--axis-border) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong)"
                   >
                     Cancelar
                   </button>
@@ -319,7 +319,7 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
                     type="button"
                     onClick={handleCreate}
                     disabled={isLoading || !newTitle.trim()}
-                    className="rounded-2xl bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:opacity-90 disabled:opacity-50"
+                    className="rounded-2xl bg-(--axis-accent) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:opacity-90 disabled:opacity-50"
                   >
                     Crear
                   </button>
@@ -334,13 +334,13 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
         <div className="fixed inset-0 z-50">
           <div className="fixed inset-0 bg-black/60" onClick={() => setIsDetailOpen(false)} />
           <div className="relative z-10 flex h-dvh items-center justify-center p-4">
-            <div className="w-full max-w-md overflow-hidden rounded-3xl border border-border bg-surface shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
-              <div className="flex items-center justify-between border-b border-border px-6 py-4">
-                <h3 className="text-lg font-semibold text-text">Detalle</h3>
+            <div className="w-full max-w-md overflow-hidden rounded-3xl border border-(--axis-border) bg-(--axis-surface) shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
+              <div className="flex items-center justify-between border-b border-(--axis-border) px-6 py-4">
+                <h3 className="text-lg font-semibold text-(--axis-text)">Detalle</h3>
                 <button
                   type="button"
                   onClick={() => setIsDetailOpen(false)}
-                  className="flex h-9 w-9 items-center justify-center rounded-2xl border border-border bg-surface-strong text-muted transition hover:bg-surface hover:text-text"
+                  className="flex h-9 w-9 items-center justify-center rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) text-(--axis-muted) transition hover:bg-(--axis-surface) hover:text-(--axis-text)"
                 >
                   <RiCloseLine className="h-5 w-5" />
                 </button>
@@ -351,19 +351,19 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
                     <input
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
-                      className="w-full rounded-2xl border border-border bg-surface-strong px-4 py-3 text-sm text-text focus:border-accent focus:outline-none"
+                      className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3 text-sm text-(--axis-text) focus:border-(--axis-accent) focus:outline-none"
                     />
                     <input
                       type="date"
                       value={editDue}
                       onChange={(e) => setEditDue(e.target.value)}
-                      className="w-full rounded-2xl border border-border bg-surface-strong px-4 py-3 text-sm text-text focus:border-accent focus:outline-none"
+                      className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3 text-sm text-(--axis-text) focus:border-(--axis-accent) focus:outline-none"
                     />
                     <div className="flex justify-end gap-2">
                       <button
                         type="button"
                         onClick={() => setIsEditOpen(false)}
-                        className="rounded-2xl border border-border px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-muted transition hover:bg-surface-strong"
+                        className="rounded-2xl border border-(--axis-border) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong)"
                       >
                         Cancelar
                       </button>
@@ -371,7 +371,7 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
                         type="button"
                         onClick={handleEdit}
                         disabled={isLoading || !editTitle.trim()}
-                        className="rounded-2xl bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:opacity-90 disabled:opacity-50"
+                        className="rounded-2xl bg-(--axis-accent) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:opacity-90 disabled:opacity-50"
                       >
                         Guardar
                       </button>
@@ -380,15 +380,15 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
                 ) : (
                   <>
                     <div>
-                      <p className="text-xs uppercase tracking-[0.3em] text-accent">Titulo</p>
-                      <p className={cn("mt-1 text-lg font-semibold text-text", selected.estado === "completada" && "line-through text-muted")}>
+                      <p className="text-xs uppercase tracking-[0.3em] text-(--axis-accent)">Titulo</p>
+                      <p className={cn("mt-1 text-lg font-semibold text-(--axis-text)", selected.estado === "completada" && "line-through text-(--axis-muted)")}>
                         {selected.titulo}
                       </p>
                     </div>
                     {selected.vence && (
                       <div>
-                        <p className="text-xs uppercase tracking-[0.3em] text-accent">Vence</p>
-                        <p className="mt-1 text-sm text-text">{selected.vence}</p>
+                        <p className="text-xs uppercase tracking-[0.3em] text-(--axis-accent)">Vence</p>
+                        <p className="mt-1 text-sm text-(--axis-text)">{selected.vence}</p>
                       </div>
                     )}
                     <div className="flex justify-between pt-4">
@@ -404,7 +404,7 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
                         <button
                           type="button"
                           onClick={() => setIsEditOpen(true)}
-                          className="flex items-center gap-2 rounded-2xl border border-border bg-surface-strong px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-text transition hover:bg-surface"
+                          className="flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--axis-text) transition hover:bg-(--axis-surface)"
                         >
                           <RiEditLine className="h-4 w-4" />
                           Editar
@@ -412,7 +412,7 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
                         <button
                           type="button"
                           onClick={() => handleToggle(selected.id, selected.estado === "pendiente")}
-                          className="flex items-center gap-2 rounded-2xl bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:opacity-90"
+                          className="flex items-center gap-2 rounded-2xl bg-(--axis-accent) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:opacity-90"
                         >
                           {selected.estado === "pendiente" ? "Completar" : "Reabrir"}
                         </button>
