@@ -1,6 +1,7 @@
 "use client";
 
 import { ProgressProvider } from "@bprogress/next/app";
+import { Toaster } from "sileo";
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -10,6 +11,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
       options={{ showSpinner: false }}
       shallowRouting
     >
+      <Toaster position="top-right" />
       {children}
     </ProgressProvider>
   );

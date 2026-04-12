@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { RiFileExcel2Line, RiFileImageLine, RiFilePpt2Line, RiFileTextLine, RiFolder3Line, RiLayoutGridLine, RiListUnordered } from "react-icons/ri";
+import { sileo } from "sileo";
 import { cn } from "@/lib/utils";
 import type { DriveFile } from "@/services/google-service";
 import { FilePreviewModal } from "@/components/drive/file-preview-modal";
+import { createDriveFolder } from "@/actions/google/create-drive-folder";
+import { uploadDriveFile } from "@/actions/google/upload-drive-file";
 
 type FileGridProps = {
   files             : DriveFile[];
@@ -99,10 +102,21 @@ const bgToneForFile = (mimeType: string, name: string) => {
 
 export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGridProps) => {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [query, setQuery] = useState("");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [selected, setSelected] = useState<DriveFile | null>(null);
   const [tab, setTab] = useState<"all" | "folders" | "files">("all");
+  const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [folderName, setFolderName] = useState("");
+  const [uploadFiles, setUploadFiles] = useState<File[]>([]);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isBulkDownloadMode, setIsBulkDownloadMode] = useState(false);
 
   useEffect(() => {
     const original = document.body.style.overflow;
@@ -139,6 +153,168 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
     router.refresh();
   };
 
+  const handleCreateFolder = () => {
+    setIsFolderModalOpen(true);
+  };
+
+  const handlePickUpload = () => {
+    setIsUploadModalOpen(true);
+  };
+
+  const handleSelectUploadFiles = (filesList: FileList | null) => {
+    if (!filesList?.length) {
+      return;
+    }
+
+    const selectedFiles = Array.from(filesList);
+    setUploadFiles((prev) => {
+      const seen = new Set(prev.map((file) => `${file.name}-${file.size}-${file.lastModified}`));
+      const next = [...prev];
+
+      selectedFiles.forEach((file) => {
+        const key = `${file.name}-${file.size}-${file.lastModified}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          next.push(file);
+        }
+      });
+
+      return next;
+    });
+  };
+
+  const handleUploadInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleSelectUploadFiles(event.target.files);
+    event.target.value = "";
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+    handleSelectUploadFiles(event.dataTransfer.files);
+  };
+
+  const handleRemoveUpload = (fileToRemove: File) => {
+    const keyToRemove = `${fileToRemove.name}-${fileToRemove.size}-${fileToRemove.lastModified}`;
+    setUploadFiles((prev) =>
+      prev.filter((file) => `${file.name}-${file.size}-${file.lastModified}` !== keyToRemove),
+    );
+  };
+
+  const toggleSelection = (id: string) => {
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]));
+  };
+
+  const clearSelection = () => {
+    setSelectedIds([]);
+  };
+
+  const exitBulkMode = () => {
+    setIsBulkDownloadMode(false);
+    clearSelection();
+  };
+
+  const handleDownloadItems = async (ids: string[]) => {
+    if (!ids.length) {
+      sileo.warning({ title: "Selecciona archivos", description: "Elige archivos o carpetas para descargar." });
+      return;
+    }
+
+    setIsDownloading(true);
+    const promise = fetch("/api/drive/download", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids }),
+    }).then(async (response) => {
+      if (!response.ok) {
+        const text = await response.text().catch(() => "");
+        throw new Error(text || "download_failed");
+      }
+      const blob = await response.blob();
+      const contentDisposition = response.headers.get("Content-Disposition");
+      const filenameMatch = contentDisposition?.match(/filename="?([^";]+)"?/i);
+      const filename = filenameMatch?.[1] ?? `drive-download-${Date.now()}.zip`;
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    sileo.promise(promise, {
+      loading: { title: "Preparando descarga..." },
+      success: { title: "Descarga lista" },
+      error: (err) => ({
+        title: "No se pudo descargar",
+        description: err instanceof Error ? err.message : undefined,
+      }),
+    });
+
+    try {
+      await promise;
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleCreateFolderSubmit = async () => {
+    const trimmed = folderName.trim();
+
+    if (!trimmed) {
+      sileo.error({ title: "Nombre requerido", description: "Escribe un nombre para la carpeta." });
+      return;
+    }
+
+    setIsCreating(true);
+    const promise = createDriveFolder({ name: trimmed, parentId: currentFolderId });
+
+    sileo.promise(promise, {
+      loading: { title: "Creando carpeta..." },
+      success: { title: "Carpeta creada" },
+      error: { title: "No se pudo crear la carpeta" },
+    });
+
+    try {
+      await promise;
+      setFolderName("");
+      setIsFolderModalOpen(false);
+      router.refresh();
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleUploadSubmit = async () => {
+    if (!uploadFiles.length) {
+      sileo.warning({ title: "Selecciona archivos", description: "Agrega uno o mas archivos para subir." });
+      return;
+    }
+
+    setIsUploading(true);
+    const promise = Promise.all(
+      uploadFiles.map((file) => uploadDriveFile({ file, parentId: currentFolderId })),
+    );
+
+    sileo.promise(promise, {
+      loading: { title: "Subiendo archivos..." },
+      success: { title: "Archivos subidos" },
+      error: { title: "No se pudo subir el archivo" },
+    });
+
+    try {
+      await promise;
+      setUploadFiles([]);
+      setIsUploadModalOpen(false);
+      router.refresh();
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const visibleItems = tab === "folders" ? folders : tab === "files" ? documents : filtered;
 
   return (
@@ -152,31 +328,252 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
             className="w-56 bg-transparent text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:outline-none"
           />
         </div>
-        <div className="flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) p-1">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => setView("grid")}
-            className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-xl text-(--axis-muted) transition",
-              view === "grid" && "bg-(--axis-surface) text-(--axis-text)",
-            )}
-            aria-label="Vista de cuadrícula"
+            onClick={() => {
+              if (isBulkDownloadMode) {
+                exitBulkMode();
+                return;
+              }
+              setIsBulkDownloadMode(true);
+            }}
+            className="rounded-2xl border border-(--axis-border) bg-(--axis-surface) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-text) transition hover:bg-(--axis-surface-strong)"
           >
-            <RiLayoutGridLine className="h-4 w-4" />
+            {isBulkDownloadMode ? "Cancelar" : "Descargar varios"}
           </button>
           <button
             type="button"
-            onClick={() => setView("list")}
-            className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-xl text-(--axis-muted) transition",
-              view === "list" && "bg-(--axis-surface) text-(--axis-text)",
-            )}
-            aria-label="Vista de lista"
+            onClick={handleCreateFolder}
+            className="rounded-2xl border border-(--axis-border) bg-(--axis-surface) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-text) transition hover:bg-(--axis-surface-strong)"
           >
-            <RiListUnordered className="h-4 w-4" />
+            Nueva carpeta
           </button>
+          <button
+            type="button"
+            onClick={handlePickUpload}
+            className="rounded-2xl border border-(--axis-border) bg-(--axis-surface) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-text) transition hover:bg-(--axis-surface-strong)"
+          >
+            Subir archivo
+          </button>
+          <div className="flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) p-1">
+            <button
+              type="button"
+              onClick={() => setView("grid")}
+              className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-xl text-(--axis-muted) transition",
+                view === "grid" && "bg-(--axis-surface) text-(--axis-text)",
+              )}
+              aria-label="Vista de cuadrícula"
+            >
+              <RiLayoutGridLine className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setView("list")}
+              className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-xl text-(--axis-muted) transition",
+                view === "list" && "bg-(--axis-surface) text-(--axis-text)",
+              )}
+              aria-label="Vista de lista"
+            >
+              <RiListUnordered className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
+
+      {isBulkDownloadMode && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted)">
+            Descargar varios {selectedIds.length ? `(${selectedIds.length} seleccionados)` : ""}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => handleDownloadItems(selectedIds)}
+              disabled={isDownloading || selectedIds.length === 0}
+              className="rounded-2xl border border-(--axis-border) bg-(--axis-surface) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-text) transition hover:bg-(--axis-surface-strong) disabled:opacity-50"
+            >
+              Descargar seleccionados
+            </button>
+            <button
+              type="button"
+              onClick={exitBulkMode}
+              className="rounded-2xl border border-(--axis-border) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong)"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isFolderModalOpen && (
+        <div className="fixed inset-0 z-50">
+          <div
+            className="fixed inset-0 bg-black/60"
+            onClick={() => {
+              if (isCreating) return;
+              setIsFolderModalOpen(false);
+              setFolderName("");
+            }}
+          />
+          <div className="relative z-10 flex min-h-[100dvh] items-center justify-center p-4">
+            <div className="w-full max-w-md rounded-3xl border border-(--axis-border) bg-(--axis-surface) p-6 shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
+            <div className="space-y-2">
+              <p className="text-sm uppercase tracking-[0.3em] text-(--axis-muted)">Drive</p>
+              <h3 className="text-xl font-semibold text-(--axis-text)">Crear carpeta</h3>
+              <p className="text-sm text-(--axis-muted)">Define el nombre de la carpeta nueva.</p>
+            </div>
+            <div className="mt-6 space-y-4">
+              <input
+                value={folderName}
+                onChange={(event) => setFolderName(event.target.value)}
+                placeholder="Nombre de la carpeta"
+                className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3 text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:outline-none"
+                disabled={isCreating}
+              />
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsFolderModalOpen(false);
+                    setFolderName("");
+                  }}
+                  disabled={isCreating}
+                  className="rounded-2xl border border-(--axis-border) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong) disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCreateFolderSubmit}
+                  disabled={isCreating}
+                  className="flex items-center gap-2 rounded-2xl bg-(--axis-accent) px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white transition hover:opacity-90 disabled:opacity-60"
+                >
+                  {isCreating && (
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  )}
+                  {isCreating ? "Creando" : "Crear"}
+                </button>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      )}
+
+      {isUploadModalOpen && (
+        <div className="fixed inset-0 z-50">
+          <div
+            className="fixed inset-0 bg-black/60"
+            onClick={() => {
+              if (isUploading) return;
+              setIsUploadModalOpen(false);
+              setUploadFiles([]);
+            }}
+          />
+          <div className="relative z-10 flex min-h-[100dvh] items-center justify-center p-4">
+            <div className="w-full max-w-2xl rounded-3xl border border-(--axis-border) bg-(--axis-surface) p-6 shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
+            <div className="space-y-2">
+              <p className="text-sm uppercase tracking-[0.3em] text-(--axis-muted)">Drive</p>
+              <h3 className="text-xl font-semibold text-(--axis-text)">Subir archivos</h3>
+              <p className="text-sm text-(--axis-muted)">Arrastra y suelta o selecciona varios archivos.</p>
+            </div>
+            <div className="mt-6 space-y-4">
+              <div
+                className={cn(
+                  "flex flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed px-6 py-10 text-center transition",
+                  isDragging
+                    ? "border-(--axis-accent) bg-(--axis-surface-strong)"
+                    : "border-(--axis-border) bg-(--axis-surface)",
+                )}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  setIsDragging(true);
+                }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={handleDrop}
+              >
+                <p className="text-sm font-semibold text-(--axis-text)">Suelta tus archivos aqui</p>
+                <p className="text-xs text-(--axis-muted)">o</p>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-text) transition hover:bg-(--axis-surface) disabled:opacity-50"
+                >
+                  Seleccionar archivos
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={handleUploadInputChange}
+                />
+              </div>
+
+              {uploadFiles.length > 0 && (
+                <div className="max-h-40 space-y-2 overflow-auto rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) p-3">
+                  {uploadFiles.map((file) => (
+                    <div key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center justify-between gap-4 text-xs text-(--axis-text)">
+                      <span className="truncate font-medium">{file.name}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-(--axis-muted)">{formatSize(file.size)}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveUpload(file)}
+                          disabled={isUploading}
+                          className="rounded-full border border-(--axis-border) px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface) disabled:opacity-50"
+                        >
+                          Quitar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => setUploadFiles([])}
+                  disabled={isUploading || uploadFiles.length === 0}
+                  className="rounded-2xl border border-(--axis-border) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong) disabled:opacity-50"
+                >
+                  Limpiar
+                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUploadModalOpen(false);
+                      setUploadFiles([]);
+                    }}
+                    disabled={isUploading}
+                    className="rounded-2xl border border-(--axis-border) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong) disabled:opacity-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleUploadSubmit}
+                    disabled={isUploading}
+                    className="flex items-center gap-2 rounded-2xl bg-(--axis-accent) px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white transition hover:opacity-90 disabled:opacity-60"
+                  >
+                    {isUploading && (
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                    )}
+                    {isUploading ? "Subiendo" : "Subir"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-6 border-b border-(--axis-border) pb-3">
         {["all", "folders", "files"].map((value) => (
@@ -224,16 +621,60 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
               const badgeTone = badgeToneForFile(file.mimeType, file.nombre);
               const extension = getExtension(file.nombre);
               const isFolderItem = file.mimeType === "application/vnd.google-apps.folder";
+              const isSelected = selectedIds.includes(file.id);
+              const handleActivate = () => {
+                if (isBulkDownloadMode) {
+                  toggleSelection(file.id);
+                  return;
+                }
+
+                if (isFolderItem) {
+                  handleOpenFolder(file);
+                  return;
+                }
+
+                setSelected(file);
+              };
               return (
-                <button
+                <div
                   key={file.id}
-                  type="button"
-                  onClick={() => (isFolderItem ? handleOpenFolder(file) : setSelected(file))}
+                  role="button"
+                  tabIndex={0}
+                  onClick={handleActivate}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      handleActivate();
+                    }
+                  }}
                   className={cn(
                     "group relative flex items-center gap-4 rounded-2xl border border-(--axis-border) bg-(--axis-surface) p-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.18)] transition hover:-translate-y-1 hover:border-[rgba(148,163,184,0.45)] hover:shadow-[0_18px_36px_rgba(15,23,42,0.24)]",
                     view === "list" && "justify-between",
                   )}
                 >
+                  {isBulkDownloadMode && (
+                    <div className="absolute bottom-3 right-3 z-10">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelection(file.id)}
+                        onPointerDown={(event) => event.stopPropagation()}
+                        onClick={(event) => event.stopPropagation()}
+                        className="h-5 w-5 rounded border-(--axis-border) bg-(--axis-surface-strong) accent-[var(--axis-accent)]"
+                        aria-label={isSelected ? "Deseleccionar" : "Seleccionar"}
+                      />
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void handleDownloadItems([file.id]);
+                    }}
+                    className="absolute right-3 top-3 z-10 rounded-full border border-(--axis-border) bg-(--axis-surface-strong) px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface)"
+                  >
+                    Descargar
+                  </button>
                   <div className="relative z-10 flex min-w-0 items-center gap-4">
                     <div
                       className={cn(
@@ -243,7 +684,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                     >
                       <Icon className={cn("h-5 w-5", tone)} />
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 pr-20 sm:pr-24">
                       <p className="truncate text-sm font-semibold text-(--axis-text)">
                         {file.nombre}
                       </p>
@@ -265,7 +706,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                       {formatSize(file.sizeBytes)}
                     </span>
                   )}
-                </button>
+                </div>
               );
             })}
           </div>
