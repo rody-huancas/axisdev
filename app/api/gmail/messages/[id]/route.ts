@@ -44,9 +44,9 @@ export async function GET(
 
   const headers = data.payload?.headers ?? [];
   const subject = getHeaderValue(headers, "Subject") || "Sin asunto";
-  const from = getHeaderValue(headers, "From") || "Remitente desconocido";
-  const date = getHeaderValue(headers, "Date") || "";
-  const to = getHeaderValue(headers, "To") || "";
+  const from    = getHeaderValue(headers, "From") || "Remitente desconocido";
+  const date    = getHeaderValue(headers, "Date") || "";
+  const to      = getHeaderValue(headers, "To") || "";
 
   let htmlContent: string | undefined;
   if (data.payload?.parts) {
@@ -63,10 +63,10 @@ export async function GET(
   return Response.json({
     item: {
       id,
-      asunto: subject,
+      asunto   : subject,
       remitente: from,
       snippet,
-      fecha: date,
+      fecha       : date,
       destinatario: to,
       htmlContent,
     },

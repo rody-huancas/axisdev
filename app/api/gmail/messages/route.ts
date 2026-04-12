@@ -4,13 +4,13 @@ import { env } from "@/lib/env";
 export const runtime = "nodejs";
 
 type GmailMessage = {
-  id: string;
-  asunto: string;
-  remitente: string;
-  snippet: string;
-  fecha?: string;
+  id           : string;
+  asunto       : string;
+  remitente    : string;
+  snippet      : string;
+  fecha       ?: string;
   destinatario?: string;
-  htmlContent?: string;
+  htmlContent ?: string;
 };
 
 const getHeaderValue = (

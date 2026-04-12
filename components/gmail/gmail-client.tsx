@@ -11,14 +11,14 @@ type GmailClientProps = {
 };
 
 type GmailMessageFull = GmailMensaje & {
-  fecha?: string;
+  fecha       ?: string;
   destinatario?: string;
-  htmlContent?: string;
+  htmlContent ?: string;
 };
 
 const formatDate = (iso: string) => {
   const date = new Date(iso);
-  const now = new Date();
+  const now  = new Date();
   const diff = now.getTime() - date.getTime();
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
@@ -36,15 +36,14 @@ const getSnippetClean = (snippet: string) => {
 const ITEMS_PER_PAGE = 20;
 
 export const GmailClient = ({ initialItems }: GmailClientProps) => {
-  const [items, setItems] = useState<GmailMensaje[]>(initialItems);
-  const [query, setQuery] = useState<string>("");
-  const [tab, setTab] = useState<"inbox" | "starred" | "snoozed" | "spam">("inbox");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [page, setPage] = useState<number>(1);
-  const [selected, setSelected] = useState<GmailMessageFull | null>(null);
+  const [items       , setItems       ] = useState<GmailMensaje[]>(initialItems);
+  const [query       , setQuery       ] = useState<string>("");
+  const [isLoading   , setIsLoading   ] = useState<boolean>(false);
+  const [page        , setPage        ] = useState<number>(1);
+  const [selected    , setSelected    ] = useState<GmailMessageFull | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
-  const [isReplyOpen, setIsReplyOpen] = useState<boolean>(false);
-  const [replyText, setReplyText] = useState<string>("");
+  const [isReplyOpen , setIsReplyOpen ] = useState<boolean>(false);
+  const [replyText   , setReplyText   ] = useState<string>("");
 
   const filtered = useMemo(() => {
     if (!query) return items;
@@ -246,7 +245,7 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
                 </button>
               </div>
 
-              <div className="max-h-[35dvh] overflow-y-auto px-6 py-5">
+              <div className="max-h-[50dvh] overflow-y-auto px-6 py-5">
                 {selected.htmlContent ? (
                   <div className="prose prose-invert prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: selected.htmlContent }} />
                 ) : (
