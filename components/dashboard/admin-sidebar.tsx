@@ -26,7 +26,7 @@ const navItems: NavItem[] = [
     icon : <RiBookOpenLine className="h-4 w-4" />,
   },
   {
-    label: "Calendar",
+    label: "Calendario",
     href : "/calendar",
     icon : <RiGroupLine className="h-4 w-4" />,
   },
