@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { RiFileExcel2Line, RiFileImageLine, RiFilePpt2Line, RiFileTextLine, RiFolder3Line, RiLayoutGridLine, RiListUnordered } from "react-icons/ri";
 import { sileo } from "sileo";
 import { cn } from "@/lib/utils";
 import type { DriveFile } from "@/services/google-service";
+import { uploadDriveFile } from "@/actions/google/upload-drive-file";
 import { FilePreviewModal } from "@/components/drive/file-preview-modal";
 import { createDriveFolder } from "@/actions/google/create-drive-folder";
-import { uploadDriveFile } from "@/actions/google/upload-drive-file";
+import { RiArrowLeftLine, RiDownloadLine, RiFileExcel2Line, RiFileImageLine, RiFilePpt2Line, RiFileTextLine, RiFolder3Line, RiFolderAddLine, RiInboxLine, RiLayoutGridLine, RiListUnordered, RiSearchLine, RiUploadCloud2Line } from "react-icons/ri";
 
 type FileGridProps = {
   files             : DriveFile[];
@@ -47,7 +47,7 @@ const getExtension = (name: string) => {
 
 const toneForFile = (mimeType: string, name: string) => {
   const ext = getExtension(name);
-  if (mimeType === "application/vnd.google-apps.folder") return "text-[#2697FF]";
+  if (mimeType === "application/vnd.google-apps.folder") return "text-(--axis-accent-2)";
   if (mimeType.startsWith("image/")) return "text-emerald-300";
   if (mimeType.includes("spreadsheet") || ["xls", "xlsx", "csv"].includes(ext)) {
     return "text-emerald-400";
@@ -68,7 +68,9 @@ const toneForFile = (mimeType: string, name: string) => {
 
 const badgeToneForFile = (mimeType: string, name: string) => {
   const ext = getExtension(name);
-  if (mimeType === "application/vnd.google-apps.folder") return "border-[#2697FF]/30 text-[#9ed0ff]";
+  if (mimeType === "application/vnd.google-apps.folder") {
+    return "border-(--axis-border) text-(--axis-accent-2)";
+  }
   if (mimeType.startsWith("image/")) return "border-emerald-400/30 text-emerald-200";
   if (mimeType.includes("spreadsheet") || ["xls", "xlsx", "csv"].includes(ext)) {
     return "border-emerald-400/30 text-emerald-200";
@@ -85,7 +87,9 @@ const badgeToneForFile = (mimeType: string, name: string) => {
 
 const bgToneForFile = (mimeType: string, name: string) => {
   const ext = getExtension(name);
-  if (mimeType === "application/vnd.google-apps.folder") return "bg-[rgba(38,151,255,0.16)]";
+  if (mimeType === "application/vnd.google-apps.folder") {
+    return "bg-[color-mix(in_srgb,var(--axis-accent-2)_16%,transparent)]";
+  }
   if (mimeType.startsWith("image/")) return "bg-emerald-500/15";
   if (mimeType.includes("spreadsheet") || ["xls", "xlsx", "csv"].includes(ext)) {
     return "bg-emerald-500/15";
@@ -103,20 +107,21 @@ const bgToneForFile = (mimeType: string, name: string) => {
 export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGridProps) => {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [query, setQuery] = useState("");
-  const [view, setView] = useState<"grid" | "list">("grid");
-  const [selected, setSelected] = useState<DriveFile | null>(null);
-  const [tab, setTab] = useState<"all" | "folders" | "files">("all");
-  const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [folderName, setFolderName] = useState("");
-  const [uploadFiles, setUploadFiles] = useState<File[]>([]);
-  const [isCreating, setIsCreating] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [isBulkDownloadMode, setIsBulkDownloadMode] = useState(false);
+
+  const [query             , setQuery             ] = useState<string>("");
+  const [view              , setView              ] = useState<"grid" | "list">("grid");
+  const [selected          , setSelected          ] = useState<DriveFile | null>(null);
+  const [tab               , setTab               ] = useState<"all" | "folders" | "files">("all");
+  const [isFolderModalOpen , setIsFolderModalOpen ] = useState<boolean>(false);
+  const [isUploadModalOpen , setIsUploadModalOpen ] = useState<boolean>(false);
+  const [folderName        , setFolderName        ] = useState<string>("");
+  const [uploadFiles       , setUploadFiles       ] = useState<File[]>([]);
+  const [isCreating        , setIsCreating        ] = useState<boolean>(false);
+  const [isUploading       , setIsUploading       ] = useState<boolean>(false);
+  const [isDragging        , setIsDragging        ] = useState<boolean>(false);
+  const [selectedIds       , setSelectedIds       ] = useState<string[]>([]);
+  const [isDownloading     , setIsDownloading     ] = useState<boolean>(false);
+  const [isBulkDownloadMode, setIsBulkDownloadMode] = useState<boolean>(false);
 
   useEffect(() => {
     const original = document.body.style.overflow;
@@ -230,13 +235,14 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
         const text = await response.text().catch(() => "");
         throw new Error(text || "download_failed");
       }
-      const blob = await response.blob();
+      const blob               = await response.blob();
       const contentDisposition = response.headers.get("Content-Disposition");
-      const filenameMatch = contentDisposition?.match(/filename="?([^";]+)"?/i);
-      const filename = filenameMatch?.[1] ?? `drive-download-${Date.now()}.zip`;
+      const filenameMatch      = contentDisposition?.match(/filename="?([^";]+)"?/i);
+      const filename           = filenameMatch?.[1] ?? `drive-download-${Date.now()}.zip`;
 
-      const url = URL.createObjectURL(blob);
+      const url  = URL.createObjectURL(blob);
       const link = document.createElement("a");
+
       link.href = url;
       link.download = filename;
       document.body.appendChild(link);
@@ -318,89 +324,127 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
   const visibleItems = tab === "folders" ? folders : tab === "files" ? documents : filtered;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2">
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Buscar archivos..."
-            className="w-56 bg-transparent text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:outline-none"
-          />
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              if (isBulkDownloadMode) {
-                exitBulkMode();
-                return;
-              }
-              setIsBulkDownloadMode(true);
-            }}
-            className="rounded-2xl border border-(--axis-border) bg-(--axis-surface) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-text) transition hover:bg-(--axis-surface-strong)"
-          >
-            {isBulkDownloadMode ? "Cancelar" : "Descargar varios"}
-          </button>
-          <button
-            type="button"
-            onClick={handleCreateFolder}
-            className="rounded-2xl border border-(--axis-border) bg-(--axis-surface) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-text) transition hover:bg-(--axis-surface-strong)"
-          >
-            Nueva carpeta
-          </button>
-          <button
-            type="button"
-            onClick={handlePickUpload}
-            className="rounded-2xl border border-(--axis-border) bg-(--axis-surface) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-text) transition hover:bg-(--axis-surface-strong)"
-          >
-            Subir archivo
-          </button>
-          <div className="flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) p-1">
+    <div className="space-y-5">
+      <div className="flex flex-col gap-4 border-b border-(--axis-border) pb-5">
+        {inFolder && (
+          <div className="flex flex-wrap items-center gap-2 text-sm text-(--axis-muted)">
             <button
               type="button"
-              onClick={() => setView("grid")}
-              className={cn(
-                "flex h-9 w-9 items-center justify-center rounded-xl text-(--axis-muted) transition",
-                view === "grid" && "bg-(--axis-surface) text-(--axis-text)",
-              )}
-              aria-label="Vista de cuadrícula"
+              onClick={handleBackToRoot}
+              className="inline-flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-(--axis-text) transition hover:bg-(--axis-surface)"
             >
-              <RiLayoutGridLine className="h-4 w-4" />
+              <RiArrowLeftLine className="h-4 w-4 text-(--axis-accent-2)" aria-hidden />
+              Raíz
+            </button>
+            <span className="text-(--axis-border)">/</span>
+            <span className="truncate font-medium text-(--axis-text)">{currentFolderName ?? "Carpeta"}</span>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="relative flex-1 lg:max-w-md">
+            <RiSearchLine
+              className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-(--axis-muted)"
+              aria-hidden
+            />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Buscar por nombre..."
+              className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) py-3 pl-11 pr-4 text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:border-[color-mix(in_srgb,var(--axis-accent)_45%,var(--axis-border))] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--axis-accent)_22%,transparent)]"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (isBulkDownloadMode) {
+                  exitBulkMode();
+                  return;
+                }
+                setIsBulkDownloadMode(true);
+              }}
+              className={cn(
+                "inline-flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] transition",
+                isBulkDownloadMode
+                  ? "border-(--axis-accent) bg-[color-mix(in_srgb,var(--axis-accent)_12%,transparent)] text-(--axis-text)"
+                  : "border-(--axis-border) bg-(--axis-surface-strong) text-(--axis-text) hover:bg-(--axis-surface)",
+              )}
+            >
+              <RiDownloadLine className="h-4 w-4 opacity-80" aria-hidden />
+              {isBulkDownloadMode ? "Salir" : "Varios"}
             </button>
             <button
               type="button"
-              onClick={() => setView("list")}
-              className={cn(
-                "flex h-9 w-9 items-center justify-center rounded-xl text-(--axis-muted) transition",
-                view === "list" && "bg-(--axis-surface) text-(--axis-text)",
-              )}
-              aria-label="Vista de lista"
+              onClick={handleCreateFolder}
+              className="inline-flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-text) transition hover:bg-(--axis-surface)"
             >
-              <RiListUnordered className="h-4 w-4" />
+              <RiFolderAddLine className="h-4 w-4 text-(--axis-accent-2)" aria-hidden />
+              Carpeta
             </button>
+            <button
+              type="button"
+              onClick={handlePickUpload}
+              className="inline-flex items-center gap-2 rounded-2xl bg-(--axis-accent) px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-[0_8px_24px_rgba(108,99,255,0.35)] transition hover:opacity-90"
+            >
+              <RiUploadCloud2Line className="h-4 w-4" aria-hidden />
+              Subir
+            </button>
+            <div className="flex items-center gap-1 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) p-1">
+              <button
+                type="button"
+                onClick={() => setView("grid")}
+                className={cn(
+                  "flex h-9 w-9 items-center justify-center rounded-xl transition",
+                  view === "grid"
+                    ? "bg-(--axis-surface) text-(--axis-accent) shadow-sm"
+                    : "text-(--axis-muted) hover:text-(--axis-text)",
+                )}
+                aria-label="Vista de cuadricula"
+              >
+                <RiLayoutGridLine className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setView("list")}
+                className={cn(
+                  "flex h-9 w-9 items-center justify-center rounded-xl transition",
+                  view === "list"
+                    ? "bg-(--axis-surface) text-(--axis-accent) shadow-sm"
+                    : "text-(--axis-muted) hover:text-(--axis-text)",
+                )}
+                aria-label="Vista de lista"
+              >
+                <RiListUnordered className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {isBulkDownloadMode && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-(--axis-border) bg-[color-mix(in_srgb,var(--axis-accent)_8%,transparent)] px-4 py-3">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted)">
-            Descargar varios {selectedIds.length ? `(${selectedIds.length} seleccionados)` : ""}
+            Seleccion multiple
+            {selectedIds.length > 0 ? (
+              <span className="ml-2 text-(--axis-text)">({selectedIds.length})</span>
+            ) : null}
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => handleDownloadItems(selectedIds)}
               disabled={isDownloading || selectedIds.length === 0}
-              className="rounded-2xl border border-(--axis-border) bg-(--axis-surface) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-text) transition hover:bg-(--axis-surface-strong) disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-2xl bg-(--axis-accent) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white transition hover:opacity-90 disabled:opacity-50"
             >
-              Descargar seleccionados
+              <RiDownloadLine className="h-4 w-4" aria-hidden />
+              Descargar
             </button>
             <button
               type="button"
               onClick={exitBulkMode}
-              className="rounded-2xl border border-(--axis-border) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong)"
+              className="rounded-2xl border border-(--axis-border) bg-(--axis-surface) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong)"
             >
               Cancelar
             </button>
@@ -418,10 +462,10 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
               setFolderName("");
             }}
           />
-          <div className="relative z-10 flex min-h-[100dvh] items-center justify-center p-4">
+          <div className="relative z-10 flex min-h-dvh items-center justify-center p-4">
             <div className="w-full max-w-md rounded-3xl border border-(--axis-border) bg-(--axis-surface) p-6 shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
             <div className="space-y-2">
-              <p className="text-sm uppercase tracking-[0.3em] text-(--axis-muted)">Drive</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-(--axis-muted)">Drive</p>
               <h3 className="text-xl font-semibold text-(--axis-text)">Crear carpeta</h3>
               <p className="text-sm text-(--axis-muted)">Define el nombre de la carpeta nueva.</p>
             </div>
@@ -473,10 +517,10 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
               setUploadFiles([]);
             }}
           />
-          <div className="relative z-10 flex min-h-[100dvh] items-center justify-center p-4">
+          <div className="relative z-10 flex min-h-dvh items-center justify-center p-4">
             <div className="w-full max-w-2xl rounded-3xl border border-(--axis-border) bg-(--axis-surface) p-6 shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
             <div className="space-y-2">
-              <p className="text-sm uppercase tracking-[0.3em] text-(--axis-muted)">Drive</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-(--axis-muted)">Drive</p>
               <h3 className="text-xl font-semibold text-(--axis-text)">Subir archivos</h3>
               <p className="text-sm text-(--axis-muted)">Arrastra y suelta o selecciona varios archivos.</p>
             </div>
@@ -495,7 +539,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={handleDrop}
               >
-                <p className="text-sm font-semibold text-(--axis-text)">Suelta tus archivos aqui</p>
+                <p className="text-sm font-semibold text-(--axis-text)">Suelta tus archivos aquí</p>
                 <p className="text-xs text-(--axis-muted)">o</p>
                 <button
                   type="button"
@@ -575,42 +619,27 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-6 border-b border-(--axis-border) pb-3">
-        {["all", "folders", "files"].map((value) => (
+      <div className="flex flex-wrap gap-1 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) p-1">
+        {(["all", "folders", "files"] as const).map((value) => (
           <button
             key={value}
             type="button"
-            onClick={() => setTab(value as "all" | "folders" | "files")}
+            onClick={() => setTab(value)}
             className={cn(
-              "pb-3 text-xs font-semibold uppercase tracking-[0.22em] text-(--axis-muted) transition",
-              tab === value &&
-                "border-b-2 border-(--axis-accent-2) text-(--axis-text)",
+              "rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition",
+              tab === value
+                ? "bg-(--axis-surface) text-(--axis-text) shadow-sm ring-1 ring-(--axis-border)"
+                : "text-(--axis-muted) hover:text-(--axis-text)",
             )}
           >
-            {value === "all" ? "Todo" : value === "folders" ? `Carpetas (${folders.length})` : `Archivos (${documents.length})`}
+            {value === "all"
+              ? "Todo"
+              : value === "folders"
+                ? `Carpetas (${folders.length})`
+                : `Archivos (${documents.length})`}
           </button>
         ))}
       </div>
-
-      {inFolder && (
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-(--axis-border) bg-(--axis-surface) px-6 py-5 shadow-[0_12px_28px_rgba(15,23,42,0.14)]">
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-(--axis-muted)">
-              Carpeta actual
-            </p>
-            <p className="mt-2 text-lg font-semibold text-(--axis-text)">
-              {currentFolderName ?? "Carpeta"}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleBackToRoot}
-            className="rounded-2xl border border-(--axis-accent-2) bg-(--axis-surface-strong) px-5 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--axis-text) transition hover:bg-(--axis-surface)"
-          >
-            Regresar
-          </button>
-        </div>
-      )}
 
       <div className="space-y-4">
         {visibleItems.length ? (
@@ -648,7 +677,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                     }
                   }}
                   className={cn(
-                    "group relative flex items-center gap-4 rounded-2xl border border-(--axis-border) bg-(--axis-surface) p-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.18)] transition hover:-translate-y-1 hover:border-[rgba(148,163,184,0.45)] hover:shadow-[0_18px_36px_rgba(15,23,42,0.24)]",
+                    "group relative flex items-center gap-4 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) p-4 text-left shadow-[0_8px_24px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--axis-accent)_28%,var(--axis-border))] hover:shadow-[0_14px_40px_rgba(15,23,42,0.14)]",
                     view === "list" && "justify-between",
                   )}
                 >
@@ -660,7 +689,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                         onChange={() => toggleSelection(file.id)}
                         onPointerDown={(event) => event.stopPropagation()}
                         onClick={(event) => event.stopPropagation()}
-                        className="h-5 w-5 rounded border-(--axis-border) bg-(--axis-surface-strong) accent-[var(--axis-accent)]"
+                        className="h-5 w-5 rounded border-(--axis-border) bg-(--axis-surface) accent-(--axis-accent)"
                         aria-label={isSelected ? "Deseleccionar" : "Seleccionar"}
                       />
                     </div>
@@ -671,9 +700,10 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                       event.stopPropagation();
                       void handleDownloadItems([file.id]);
                     }}
-                    className="absolute right-3 top-3 z-10 rounded-full border border-(--axis-border) bg-(--axis-surface-strong) px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface)"
+                    className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-(--axis-border) bg-(--axis-surface) text-(--axis-muted) shadow-sm transition hover:border-[color-mix(in_srgb,var(--axis-accent)_35%,var(--axis-border))] hover:text-(--axis-accent)"
+                    title="Descargar"
                   >
-                    Descargar
+                    <RiDownloadLine className="h-4 w-4" aria-hidden />
                   </button>
                   <div className="relative z-10 flex min-w-0 items-center gap-4">
                     <div
@@ -684,7 +714,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                     >
                       <Icon className={cn("h-5 w-5", tone)} />
                     </div>
-                    <div className="min-w-0 pr-20 sm:pr-24">
+                    <div className="min-w-0 pr-12">
                       <p className="truncate text-sm font-semibold text-(--axis-text)">
                         {file.nombre}
                       </p>
@@ -711,7 +741,17 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
             })}
           </div>
         ) : (
-          <p className="text-sm text-(--axis-muted)">No hay resultados para esta vista.</p>
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-(--axis-border) bg-[color-mix(in_srgb,var(--axis-bg)_40%,transparent)] px-6 py-16 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-(--axis-surface-strong) ring-1 ring-(--axis-border)">
+              <RiInboxLine className="h-7 w-7 text-(--axis-muted)" aria-hidden />
+            </div>
+            <p className="mt-4 text-sm font-semibold text-(--axis-text)">No hay elementos</p>
+            <p className="mt-1 max-w-sm text-sm text-(--axis-muted)">
+              {query
+                ? "Prueba otro término de búsqueda o cambia el filtro."
+                : "Sube archivos o crea una carpeta para empezar."}
+            </p>
+          </div>
         )}
       </div>
 
