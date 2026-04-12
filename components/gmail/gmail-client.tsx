@@ -253,10 +253,14 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
                   <div className="whitespace-pre-wrap text-sm leading-relaxed text-(--axis-text)">{selected.snippet || "Sin contenido"}</div>
                 )}
               </div>
-
-              <div className="shrink-0 flex items-center justify-between gap-3 border-t border-(--axis-border) bg-(--axis-surface) px-6 py-4">
-                <div className="flex gap-2">
-                  
+              <div className="shrink-0 flex items-center justify-end gap-3 border-t border-(--axis-border) bg-(--axis-surface) px-6 py-4">
+                <button
+                  type="button"
+                  onClick={() => setIsDetailOpen(false)}
+                  className="rounded-2xl border border-(--axis-border) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong)"
+                >
+                  Cerrar
+                </button>
               </div>
 
               {isReplyOpen && (
