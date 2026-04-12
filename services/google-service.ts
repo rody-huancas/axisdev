@@ -165,52 +165,18 @@ export const fetchDriveFiles = async (folderId: string = "root"): Promise<Servic
     const auth = await withAuthHeaders();
     if (!auth.ok) return auth;
 
-    const isRoot = !folderId || folderId === "root";
-    const query  = isRoot ? "trashed = false" : `'${folderId}' in parents and trashed = false`;
+    const resolvedFolderId = folderId && folderId !== "root" ? folderId : "root";
+    const isRoot           = resolvedFolderId === "root";
+    const query            = `'${resolvedFolderId}' in parents and trashed = false`;
 
     const paramsBase = {
       q                        : query,
       fields                   : "nextPageToken, files(id,name,mimeType,modifiedTime,size,iconLink,webViewLink,thumbnailLink)",
       supportsAllDrives        : true,
       includeItemsFromAllDrives: true,
-      corpora                  : "allDrives",
+      corpora                  : isRoot ? "user" : "allDrives",
       spaces                   : "drive",
     };
-
-    if (isRoot) {
-      const response = await googleApi.get("/drive/v3/files", {
-        headers: auth.headers,
-        params : {
-          ...paramsBase,
-          pageSize: 50,
-          orderBy : "modifiedTime desc",
-        },
-      });
-
-      const files = (response.data?.files ?? []).map(
-        (file: {
-          id            : string;
-          name          : string;
-          mimeType      : string;
-          modifiedTime ?: string;
-          size         ?: string;
-          iconLink     ?: string;
-          webViewLink  ?: string;
-          thumbnailLink?: string;
-        }) => ({
-          id           : file.id,
-          nombre       : file.name,
-          mimeType     : file.mimeType,
-          actualizado  : formatDate(file.modifiedTime),
-          sizeBytes    : Number(file.size ?? 0),
-          iconLink     : file.iconLink,
-          webViewLink  : file.webViewLink,
-          thumbnailLink: file.thumbnailLink,
-        }),
-      );
-
-      return { ok: true, data: files };
-    }
 
     const allFiles : DriveFile[] = [];
     let   pageToken: string | undefined;
