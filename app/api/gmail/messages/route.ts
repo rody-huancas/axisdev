@@ -8,12 +8,23 @@ type GmailMessage = {
   asunto: string;
   remitente: string;
   snippet: string;
+  fecha?: string;
+  destinatario?: string;
+  htmlContent?: string;
 };
 
 const getHeaderValue = (
   headers: Array<{ name: string; value: string }>,
   key: string,
 ) => headers.find((header) => header.name.toLowerCase() === key.toLowerCase())?.value ?? "";
+
+const safeJson = async (response: Response) => {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+};
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -29,26 +40,24 @@ export async function GET(request: Request) {
   url.searchParams.set("labelIds", "INBOX");
 
   const response = await fetch(url.toString(), {
-    headers: {
-      Authorization: `Bearer ${session.accessToken}`,
-    },
+    headers: { Authorization: `Bearer ${session.accessToken}` },
   });
 
   if (!response.ok) {
     return new Response(`Google API error: ${response.status}`, { status: 502 });
   }
 
-  const listData = (await response.json()) as {
-    messages?: Array<{ id: string }>;
-  };
+  const listData = await safeJson(response);
+  if (!listData?.messages) {
+    return Response.json({ items: [] });
+  }
 
-  const messages = listData.messages ?? [];
   const details = await Promise.all(
-    messages.map((msg) =>
+    listData.messages.map((msg: { id: string }) =>
       fetch(`${env.api.gmail}/messages/${msg.id}?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=Date`, {
         headers: { Authorization: `Bearer ${session.accessToken}` },
       })
-        .then((r) => r.json())
+        .then(safeJson)
         .catch(() => null),
     ),
   );
