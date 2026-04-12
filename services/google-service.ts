@@ -43,6 +43,29 @@ export type GmailMensaje = {
   snippet  : string;
 };
 
+export const fetchGmailUnreadCount = async (): Promise<ServiceResult<number>> => {
+  try {
+    const auth = await withAuthHeaders();
+    if (!auth.ok) return auth;
+
+    const response = await axios.get(
+      "https://gmail.googleapis.com/gmail/v1/users/me/messages",
+      {
+        headers: auth.headers,
+        params : {
+          maxResults: 1,
+          labelIds  : "INBOX",
+          q         : "is:unread",
+        },
+      },
+    );
+
+    return { ok: true, data: Number(response.data?.resultSizeEstimate ?? 0) };
+  } catch (error) {
+    return { ok: false, error: handleAxiosError(error) };
+  }
+};
+
 export type DriveFile = {
   id            : string;
   nombre        : string;
