@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import archiver from "archiver";
 import { PassThrough, Readable } from "stream";
+import { env } from "@/lib/env";
 
 export const runtime = "nodejs";
 
@@ -21,7 +22,7 @@ type FileEntry = {
   path    : string;
 };
 
-const driveBase = "https://www.googleapis.com/drive/v3/files";
+const driveBase = env.api.drive;
 
 const getResponseTextSafe = async (response: Response) => {
   try {

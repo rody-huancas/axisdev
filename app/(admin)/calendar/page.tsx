@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { CalendarClient } from "@/components/calendar/calendar-client";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { getDefaultCalendarFetchRange } from "@/lib/calendar-date-range";
+import { env } from "@/lib/env";
 
 type ApiEvent = {
   id          : string;
@@ -16,7 +17,7 @@ type ApiEvent = {
   attendees  ?: string[];
 };
 
-const calendarEndpoint = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
+const calendarEndpoint = env.api.calendar;
 
 const toIso = (dateTime?: string, date?: string) => {
   if (dateTime) return dateTime;

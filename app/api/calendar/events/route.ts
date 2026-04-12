@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { env } from "@/lib/env";
 
 export const runtime = "nodejs";
 
@@ -14,7 +15,7 @@ type CalendarApiEvent = {
   attendees?: string[];
 };
 
-const calendarEndpoint = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
+const calendarEndpoint = env.api.calendar;
 
 const safeText = async (response: Response) => {
   try {

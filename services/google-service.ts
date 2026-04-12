@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { getGoogleAuthHeaders } from "@/actions/google/get-google-auth-headers";
 import { googleApi } from "@/lib/axios-config";
+import { env } from "@/lib/env";
 
 export type ServiceResult<T> = | { ok: true; data: T } | { ok: false; error: string };
 
@@ -49,7 +50,7 @@ export const fetchGmailUnreadCount = async (): Promise<ServiceResult<number>> =>
     if (!auth.ok) return auth;
 
     const response = await axios.get(
-      "https://gmail.googleapis.com/gmail/v1/users/me/messages",
+      `${env.api.gmail}/messages`,
       {
         headers: auth.headers,
         params : {
@@ -300,7 +301,7 @@ export const fetchTasksPreview = async (): Promise<ServiceResult<TareaPendiente[
     if (!auth.ok) return auth;
 
     const response = await axios.get(
-      "https://tasks.googleapis.com/tasks/v1/lists/@default/tasks",
+      env.api.tasks,
       {
         headers: auth.headers,
         params : {
@@ -337,7 +338,7 @@ export const fetchGmailPreview = async (): Promise<ServiceResult<GmailMensaje[]>
     if (!auth.ok) return auth;
 
     const listResponse = await axios.get(
-      "https://gmail.googleapis.com/gmail/v1/users/me/messages",
+      `${env.api.gmail}/messages`,
       {
         headers: auth.headers,
         params: {
@@ -352,7 +353,7 @@ export const fetchGmailPreview = async (): Promise<ServiceResult<GmailMensaje[]>
       messages.map((message: { id: string }) =>
         axios
           .get(
-            `https://gmail.googleapis.com/gmail/v1/users/me/messages/${message.id}`,
+            `${env.api.gmail}/messages/${message.id}`,
             {
               headers: auth.headers,
               params: {
