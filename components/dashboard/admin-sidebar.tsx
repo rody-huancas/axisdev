@@ -31,7 +31,7 @@ const navItems: NavItem[] = [
     icon : <RiGroupLine className="h-4 w-4" />,
   },
   {
-    label: "Tasks",
+    label: "Tareas",
     href : "/tasks",
     icon : <RiTaskLine className="h-4 w-4" />,
   },

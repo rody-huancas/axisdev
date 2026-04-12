@@ -327,6 +327,38 @@ export const fetchTasksPreview = async (): Promise<ServiceResult<TareaPendiente[
   }
 };
 
+export const fetchTaskList = async (): Promise<ServiceResult<TareaPendiente[]>> => {
+  try {
+    const auth = await withAuthHeaders();
+    if (!auth.ok) return auth;
+
+    const response = await axios.get(
+      env.api.tasks,
+      {
+        headers: auth.headers,
+        params: {
+          maxResults   : 100,
+          showCompleted: true,
+          showHidden   : false,
+        },
+      },
+    );
+
+    const tasks = (response.data?.items ?? []).map(
+      (task: { id: string; title?: string; status?: string; due?: string }) => ({
+        id     : task.id,
+        titulo : task.title ?? "Tarea sin titulo",
+        estado : task.status === "completed" ? "completada" : "pendiente",
+        vence  : formatDate(task.due),
+      }),
+    );
+
+    return { ok: true, data: tasks };
+  } catch (error) {
+    return { ok: false, error: handleAxiosError(error) };
+  }
+};
+
 const getHeaderValue = (
   headers: Array<{ name: string; value: string }>,
   key: string,
