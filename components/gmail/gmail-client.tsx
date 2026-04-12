@@ -246,7 +246,7 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
                 </button>
               </div>
 
-              <div className="max-h-[55dvh] overflow-y-auto px-6 py-5">
+              <div className="max-h-[35dvh] overflow-y-auto px-6 py-5">
                 {selected.htmlContent ? (
                   <div className="prose prose-invert prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: selected.htmlContent }} />
                 ) : (
@@ -263,13 +263,6 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
                   >
                     <RiReplyLine className="h-4 w-4" />
                     Responder
-                  </button>
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--axis-text) transition hover:bg-(--axis-surface)"
-                  >
-                    <RiReplyLine className="h-4 w-4 rotate-180" />
-                    Reenviar
                   </button>
                 </div>
                 <div className="flex gap-2">
