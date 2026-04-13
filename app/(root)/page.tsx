@@ -11,26 +11,27 @@ const HomePage = async () => {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0f0f12] px-6 py-12">
-      <div className="pointer-events-none absolute -left-40 -top-40 h-96 w-96 rounded-full bg-[#6366f1]/30 blur-[120px]" />
-      <div className="pointer-events-none absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-[#06b6d4]/20 blur-[100px]" />
-      <div className="pointer-events-none absolute left-1/3 top-1/2 h-64 w-64 rounded-full bg-[#8b5cf6]/20 blur-[80px]" />
+    <main className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-slate-950">
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f1a_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f1a_1px,transparent_1px)] bg-[size:24px_24px]" />
+        <div className="absolute left-1/2 top-0 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_closest-side,rgba(99,102,241,0.15),transparent)]" />
+      </div>
 
-      <section className="mx-auto grid w-full max-w-7xl items-center gap-16 lg:grid-cols-[1fr_1.1fr]">
-        <div className="space-y-10">
+      <section className="flex w-full max-w-6xl flex-col gap-12 px-6 py-8 lg:flex-row lg:items-center lg:gap-20">
+        <div className="space-y-10 lg:flex-1">
           <div className="flex items-center gap-3">
             <Image
               src="/icon-axisdev.png"
               alt="AxisDev"
-              width={56}
-              height={56}
+              width={48}
+              height={48}
               priority
-              className="h-14 w-14 rounded-2xl"
+              className="h-12 w-12 rounded-xl"
             />
-            <span className="text-xl font-bold text-white">AxisDev</span>
+            <span className="text-2xl font-bold text-white">AxisDev</span>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -41,88 +42,88 @@ const HomePage = async () => {
               </span>
             </div>
 
-            <h1 className="text-5xl font-bold leading-tight text-white lg:text-6xl">
+            <h1 className="text-4xl font-bold leading-tight tracking-tight text-white lg:text-5xl">
               Tu Google Workspace,
-              <span className="block mt-2 bg-linear-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+              <span className="block mt-2 bg-linear-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-[length:_200%_auto] bg-clip-text text-transparent">
                 unificado y accionable.
               </span>
             </h1>
 
-            <p className="max-w-lg text-base text-zinc-400">
+            <p className="max-w-md text-base text-zinc-400 leading-relaxed">
               Centraliza Drive, Calendar, Tasks y Gmail con una vista clara del
               trabajo y el contexto. Menos ruido, más foco.
             </p>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-8 backdrop-blur-xl">
-            <div className="mb-6 flex items-center justify-between">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm">
+            <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-indigo-500" />
-                <p className="text-xs uppercase tracking-[0.3em] text-zinc-500">
+                <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
                   axisdev.auth
                 </p>
               </div>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+              <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-500">
                 OAuth 2.0
               </span>
             </div>
             <UserAuthForm />
-            <p className="mt-4 text-xs text-zinc-500">
-              Acceso seguro con tu cuenta de Google.
+            <p className="mt-3 text-xs text-zinc-500">
+              Acceso seguro con tu cuenta de Google
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2">
             {[
-              { icon: "⚡", label: "Sincronizacion rapida" },
-              { icon: "👁", label: "Visibilidad total" },
-              { icon: "🎯", label: "Control centralizado" },
+              { icon: "⚡", label: "Sincronizacion" },
+              { icon: "👁", label: "Visibilidad" },
+              { icon: "🎯", label: "Control" },
             ].map((item) => (
               <span
                 key={item.label}
-                className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-400"
+                className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-400"
               >
                 <span>{item.icon}</span>
-                <span>{item.label}</span>
+                <span className="text-xs">{item.label}</span>
               </span>
             ))}
           </div>
         </div>
 
-        <div className="relative">
-          <div className="absolute -left-4 -top-4 h-full w-full rounded-[40px] border border-white/10 bg-white/5" />
-          <div className="relative overflow-hidden rounded-[36px] border border-white/10 bg-white/[0.02] shadow-2xl backdrop-blur">
+        <div className="relative lg:flex-1">
+          <div className="absolute -left-3 -top-3 h-full w-full rounded-[32px] border border-white/10 bg-white/5" />
+          <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.02] shadow-2xl backdrop-blur-sm">
             <div className="relative aspect-[4/3] w-full">
               <Image
                 src="/image-1.jpeg"
                 alt="Vista previa AxisDev"
                 fill
-                sizes="(min-width: 1024px) 60vw, 100vw"
-                className="object-cover opacity-80"
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                className="object-cover opacity-70"
                 priority
               />
-              <div className="absolute inset-0 bg-linear-to-t from-[#0f0f12] via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-transparent to-transparent" />
 
-              <div className="absolute bottom-6 left-6 right-6 rounded-2xl border border-white/10 bg-black/60 px-5 py-4 backdrop-blur">
-                <p className="text-sm font-semibold text-white">Workspace preview</p>
-                <p className="text-xs text-zinc-400 mt-1">
-                  Visibilidad en tiempo real de tu stack de Google
+              <div className="absolute bottom-5 left-5 right-5 rounded-xl border border-white/10 bg-black/50 px-4 py-3 backdrop-blur">
+                <p className="text-sm font-medium text-white">Workspace preview</p>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Visibilidad en tiempo real
                 </p>
               </div>
 
-              <div className="absolute right-6 top-6 flex gap-2">
-                <div className="rounded-xl border border-white/10 bg-black/40 px-3 py-2 backdrop-blur">
+              <div className="absolute right-4 top-4 flex gap-2">
+                <div className="rounded-lg border border-white/10 bg-black/40 px-3 py-2 backdrop-blur">
                   <p className="text-xs font-medium text-white">Drive</p>
                   <p className="text-[10px] text-zinc-400">12 archivos</p>
                 </div>
-                <div className="rounded-xl border border-white/10 bg-black/40 px-3 py-2 backdrop-blur">
+                <div className="rounded-lg border border-white/10 bg-black/40 px-3 py-2 backdrop-blur">
                   <p className="text-xs font-medium text-white">Tasks</p>
                   <p className="text-[10px] text-zinc-400">5 pendientes</p>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 px-6 py-5">
+            <div className="grid grid-cols-3 gap-2 px-5 py-4">
               {[
                 { icon: "📁", label: "Drive" },
                 { icon: "📅", label: "Calendar" },
@@ -133,9 +134,9 @@ const HomePage = async () => {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3"
+                  className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2"
                 >
-                  <span className="text-lg">{item.icon}</span>
+                  <span className="text-sm">{item.icon}</span>
                   <span className="text-xs font-medium text-zinc-300">{item.label}</span>
                 </div>
               ))}
