@@ -1,44 +1,12 @@
 import { redirect } from "next/navigation";
+import { env } from "@/lib/env";
 import { auth } from "@/auth";
 import { CalendarClient } from "@/components/calendar/calendar-client";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { getDefaultCalendarFetchRange } from "@/lib/calendar-date-range";
-import { env } from "@/lib/env";
-
-type ApiEvent = {
-  id          : string;
-  title       : string;
-  start       : string;
-  end         : string;
-  meetLink   ?: string | null;
-  htmlLink   ?: string | null;
-  location   ?: string | null;
-  description?: string | null;
-  attendees  ?: string[];
-};
+import { toIso, toEndIso, extractMeetLink, type ApiEvent } from "@/lib/utils/calendar-transform";
 
 const calendarEndpoint = env.api.calendar;
-
-const toIso = (dateTime?: string, date?: string) => {
-  if (dateTime) return dateTime;
-  if (!date) return "";
-  return new Date(`${date}T00:00:00`).toISOString();
-};
-
-const toEndIso = (dateTime?: string, date?: string) => {
-  if (dateTime) return dateTime;
-  if (!date) return "";
-  const start = new Date(`${date}T00:00:00`);
-  start.setDate(start.getDate() + 1);
-  return start.toISOString();
-};
-
-const extractMeetLink = (event: { hangoutLink?: string; conferenceData?: { entryPoints?: Array<{ entryPointType?: string; uri?: string }> } }) => {
-  if (event.hangoutLink) return event.hangoutLink;
-  const entryPoints = event.conferenceData?.entryPoints ?? [];
-  const video = entryPoints.find((entry) => entry.entryPointType === "video");
-  return video?.uri ?? null;
-};
 
 const CalendarPage = async () => {
   const session = await auth();
@@ -67,7 +35,7 @@ const CalendarPage = async () => {
   const data = response.ok
     ? ((await response.json()) as {
         items?: Array<{
-          id             : string;
+          id            ?: string;
           summary       ?: string;
           start         ?: { dateTime?: string; date?: string };
           end           ?: { dateTime?: string; date?: string };
@@ -81,17 +49,20 @@ const CalendarPage = async () => {
       })
     :  { items: [] };
 
-  const initialItems: ApiEvent[] = (data.items ?? []).map((event) => ({
-    id         : event.id,
-    title      : event.summary ?? "(Sin titulo)",
-    start      : toIso(event.start?.dateTime, event.start?.date),
-    end        : toEndIso(event.end?.dateTime, event.end?.date),
-    meetLink   : extractMeetLink(event),
-    htmlLink   : event.htmlLink ?? null,
-    location   : event.location ?? null,
-    description: event.description ?? null,
-    attendees  : (event.attendees ?? []).map((attendee) => attendee.email).filter(Boolean) as string[],
-  }));
+  const rawItems = data.items ?? [];
+  const initialItems: ApiEvent[] = rawItems
+    .filter((event) => event.id)
+    .map((event) => ({
+      id         : event.id as string,
+      title      : event.summary ?? "(Sin titulo)",
+      start      : toIso(event.start?.dateTime, event.start?.date),
+      end        : toEndIso(event.end?.dateTime, event.end?.date),
+      meetLink   : extractMeetLink(event),
+      htmlLink   : event.htmlLink    ?? null,
+      location   : event.location    ?? null,
+      description: event.description ?? null,
+      attendees  : (event.attendees  ?? []).map((attendee) => attendee.email).filter(Boolean) as string[],
+    }));
 
   return (
     <section className="space-y-6">
