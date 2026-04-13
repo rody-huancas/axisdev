@@ -90,9 +90,12 @@ const DashboardPage = async () => {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="rounded-2xl bg-white/20 px-4 py-2 text-xs font-medium text-white">
-                  {storageInfo.porcentaje}% usado
-                </span>
+                <Link
+                  href="/drive"
+                  className="rounded-2xl bg-white px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 shadow-lg transition hover:-translate-y-1"
+                >
+                  Ir a Drive
+                </Link>
               </div>
             </div>
           </div>
