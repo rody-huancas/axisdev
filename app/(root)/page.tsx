@@ -11,23 +11,18 @@ const HomePage = async () => {
   }
 
   return (
-    <main className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-slate-950 py-8">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f1a_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f1a_1px,transparent_1px)] bg-[size:24px_24px]" />
-        <div className="absolute left-1/2 top-0 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_closest-side,rgba(99,102,241,0.15),transparent)]" />
+    <main className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#09090b]">
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.25),rgba(0,0,0,0))]" />
+        <div className="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#26262620_1px,transparent_1px),linear-gradient(to_bottom,#26262620_1px,transparent_1px)] bg-[size:32px_32px]" />
+        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-violet-600/20 blur-[100px]" />
+        <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-cyan-600/15 blur-[100px]" />
       </div>
 
       <div className="flex w-full max-w-5xl flex-col items-center gap-12 px-6 lg:flex-row lg:justify-between lg:gap-16">
         <div className="w-full max-w-lg space-y-8">
           <div className="flex items-center gap-3">
-            <Image
-              src="/icon-axisdev.png"
-              alt="AxisDev"
-              width={48}
-              height={48}
-              priority
-              className="h-12 w-12 rounded-xl"
-            />
+            <Image src="/icon-axisdev.png" alt="AxisDev" width={48} height={48} priority className="h-12 w-12 rounded-xl" />
             <span className="text-2xl font-bold text-white">AxisDev</span>
           </div>
 
@@ -37,27 +32,25 @@ const HomePage = async () => {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
               </span>
-              <span className="text-xs font-medium uppercase tracking-wider text-emerald-400">
-                Google Workspace Hub
-              </span>
+              <span className="text-xs font-medium uppercase tracking-wider text-emerald-400">Google Workspace Hub</span>
             </div>
 
-            <div className="space-y-2">
-              <h1 className="text-3xl font-bold leading-tight text-white lg:text-4xl">
+            <div className="space-y-3">
+              <h1 className="text-5xl font-extrabold leading-[1.1] text-white tracking-tight" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
                 Tu Google Workspace,
               </h1>
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="text-3xl font-bold leading-tight lg:text-4xl bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="text-5xl font-extrabold leading-[1.1] tracking-tight bg-gradient-to-r from-white to-white bg-clip-text text-transparent" style={{ WebkitTextStroke: '1px rgba(255,255,255,0.5)', color: 'transparent' }}>
                   unificado
                 </span>
-                <span className="text-2xl font-bold text-zinc-600">+</span>
-                <span className="text-3xl font-bold leading-tight lg:text-4xl bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                <span className="text-4xl font-bold text-zinc-700">+</span>
+                <span className="text-5xl font-extrabold leading-[1.1] tracking-tight text-white">
                   accionable
                 </span>
               </div>
             </div>
 
-            <p className="text-sm text-zinc-400 leading-relaxed">
+            <p className="text-base text-zinc-400 leading-relaxed">
               Centraliza Drive, Calendar, Tasks y Gmail con una vista clara del trabajo y el contexto.
             </p>
           </div>
@@ -87,7 +80,7 @@ const HomePage = async () => {
           <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] shadow-2xl">
             <div className="relative aspect-[4/3] w-full">
               <Image src="/image-1.jpeg" alt="Preview" fill sizes="400px" className="object-cover opacity-70" priority />
-              <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-[#09090b] via-transparent to-transparent" />
               <div className="absolute bottom-4 left-4 right-4 rounded-lg border border-white/10 bg-black/50 px-3 py-2 backdrop-blur">
                 <p className="text-sm font-medium text-white">Workspace preview</p>
               </div>
