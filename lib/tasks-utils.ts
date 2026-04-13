@@ -1,6 +1,4 @@
-import { cn } from "@/lib/utils";
-
-const pad2 = (value: number) => String(value).padStart(2, "0");
+import type { TareaPendiente } from "@/services/google-service";
 
 export const formatDateDisplay = (iso?: string) => {
   if (!iso) return "";
@@ -55,13 +53,13 @@ export const taskIconColor = (estado: string, dueDate?: string) => {
 
 export const ITEMS_PER_PAGE = 15;
 
-export const filterTasksByStatus = (tasks: Array<{ estado: string }>, status: "all" | "pendiente" | "completada") => {
+export const filterTasksByStatus = (tasks: TareaPendiente[], status: "all" | "pendiente" | "completada") => {
   if (status === "all") return tasks;
   return tasks.filter((task) => task.estado === status);
 };
 
 export const sortTasks = (
-  tasks: Array<{ estado: string; vence?: string }>,
+  tasks: TareaPendiente[],
   sort: "date" | "alpha" | "status",
 ) => {
   const sorted = [...tasks];

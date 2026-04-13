@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Image from "next/image";
 import { useThemeStore } from "@/lib/store/theme";
 import { useAdminShell } from "@/components/dashboard/admin-shell";
-import { RiMenuFoldLine, RiMenuUnfoldLine, RiMoonLine, RiSunLine } from "react-icons/ri";
+import { RiMenuFoldLine, RiMenuUnfoldLine, RiMenuLine, RiMoonLine, RiSunLine } from "react-icons/ri";
 
 
 type DashboardHeaderProps = {
@@ -14,7 +14,7 @@ type DashboardHeaderProps = {
 };
 
 export const DashboardHeader = ({ userName, userEmail, userImage }: DashboardHeaderProps) => {
-  const { isDesktopOpen, toggleDesktop } = useAdminShell();
+  const { isDesktopOpen, toggleDesktop, openMobile } = useAdminShell();
 
   const theme       = useThemeStore((state) => state.theme);
   const setTheme    = useThemeStore((state) => state.setTheme);
@@ -40,7 +40,15 @@ export const DashboardHeader = ({ userName, userEmail, userImage }: DashboardHea
 
   return (
     <header className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border bg-(--axis-surface) px-3 py-2 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur sm:px-5 sm:py-3">
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-3">
+        <button
+          className="flex h-10 w-10 items-center justify-center rounded-xl border bg-(--axis-surface) text-(--axis-muted) shadow-sm transition hover:-translate-y-0.5 hover:bg-(--axis-surface-strong) lg:hidden"
+          type="button"
+          onClick={openMobile}
+          aria-label="Abrir menu"
+        >
+          <RiMenuLine className="h-5 w-5" />
+        </button>
         <button
           className="hidden h-10 w-10 items-center justify-center rounded-xl border bg-(--axis-surface) text-(--axis-muted) shadow-sm transition hover:-translate-y-0.5 hover:bg-(--axis-surface-strong) lg:flex"
           type="button"

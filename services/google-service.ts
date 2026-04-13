@@ -31,11 +31,13 @@ export type StorageInfo = {
 };
 
 export type TareaPendiente = {
-  id     : string;
-  titulo : string;
-  estado : "completada" | "pendiente";
-  vence ?: string;
+  id          : string;
+  titulo      : string;
+  estado      : "completada" | "pendiente";
+  vence      ?: string;
   descripcion?: string;
+  parent     ?: string;
+  tasklist   ?: string;
 };
 
 export type GmailMensaje = {
@@ -346,11 +348,13 @@ export const fetchTaskList = async (): Promise<ServiceResult<TareaPendiente[]>> 
     );
 
     const tasks = (response.data?.items ?? []).map(
-      (task: { id: string; title?: string; status?: string; due?: string }) => ({
-        id     : task.id,
-        titulo : task.title ?? "Tarea sin titulo",
-        estado : task.status === "completed" ? "completada" : "pendiente",
-        vence  : formatDate(task.due),
+      (task: { id: string; title?: string; status?: string; due?: string; notes?: string; tasklistId?: string }) => ({
+        id         : task.id,
+        titulo     : task.title ?? "Tarea sin titulo",
+        estado     : task.status === "completed" ? "completada": "pendiente",
+        vence      : formatDate(task.due),
+        descripcion: task.notes ?? "",
+        tasklist   : task.tasklistId,
       }),
     );
 

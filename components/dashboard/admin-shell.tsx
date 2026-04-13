@@ -12,6 +12,7 @@ type AdminShellContextValue = {
   isDesktopOpen: boolean;
   toggleDesktop: () => void;
   openMobile   : () => void;
+  closeMobile  : () => void;
 };
 
 const AdminShellContext = createContext<AdminShellContextValue | null>(null);
@@ -35,6 +36,7 @@ export const AdminShell = ({ children }: AdminShellProps) => {
       isDesktopOpen,
       toggleDesktop: () => setIsDesktopOpen((current) => !current),
       openMobile   : () => setIsMobileOpen(true),
+      closeMobile : () => setIsMobileOpen(false),
     }),
     [isDesktopOpen],
   );

@@ -1,10 +1,23 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { env } from "@/lib/env";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { TasksClient } from "@/components/tasks/tasks-client";
 import { fetchTaskList } from "@/services/google-service";
 
 export const dynamic = "force-dynamic";
+
+const fetchTaskLists = async () => {
+  const session = await auth();
+  if (!session?.accessToken) return [];
+
+  const response = await fetch(env.api.tasklists + "?_=" + Date.now(), {
+    headers: { Authorization: `Bearer ${session.accessToken}` },
+  });
+  if (!response.ok) return [];
+  const data = await response.json();
+  return data.items ?? [];
+};
 
 const TasksPage = async () => {
   const session = await auth();
@@ -15,6 +28,8 @@ const TasksPage = async () => {
 
   const tasksResult = await fetchTaskList();
   const tasks = tasksResult.ok ? tasksResult.data : [];
+
+  const tasklists = await fetchTaskLists();
 
   const pendientes = tasks.filter((t) => t.estado === "pendiente").length;
   const completadas = tasks.filter((t) => t.estado === "completada").length;
@@ -46,7 +61,7 @@ const TasksPage = async () => {
       </div>
 
       <div className="overflow-hidden rounded-3xl border border-border bg-surface p-5 shadow-[0_14px_40px_rgba(15,23,42,0.12)] sm:p-6">
-        <TasksClient initialTasks={tasks} />
+        <TasksClient initialTasks={tasks} initialTasklists={tasklists} />
       </div>
     </section>
   );

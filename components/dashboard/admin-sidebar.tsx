@@ -66,7 +66,7 @@ export const AdminSidebar = ({ isMobileOpen, onMobileClose, isDesktopOpen }: Adm
         id="admin-sidebar"
         className={cn(
           "fixed left-0 top-0 z-50 flex h-screen w-72 flex-col justify-between border-r border-(--axis-border) bg-(--axis-surface) px-6 py-8 shadow-[0_14px_40px_rgba(15,23,42,0.08)] backdrop-blur transition-[transform,width,padding] duration-300 ease-out lg:translate-x-0",
-          isMobileOpen ? "translate-x-0" : "-translate-x-full",
+          isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           isDesktopOpen ? "lg:w-72 lg:px-6" : "lg:w-20 lg:px-3",
         )}
       >
