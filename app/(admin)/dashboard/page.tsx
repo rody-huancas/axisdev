@@ -5,7 +5,8 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DriveBreakdownChart } from "@/components/dashboard/drive-breakdown-chart";
 import { LearningCharts } from "@/components/dashboard/learning-charts";
 import { TaskStatusChart } from "@/components/dashboard/task-status-chart";
-import { fetchCalendarEvents, fetchGmailPreview, fetchGmailUnreadCount, fetchRecentFiles, fetchStorageInfo, fetchTasksPreview } from "@/services/google-service";
+import { fetchCalendarEvents, fetchGmailPreview, fetchGmailUnreadCount, fetchRecentFiles, fetchStorageInfo, fetchTasksPreview } from "@/services";
+import { computeStorageBreakdown, computeWeeklyBars, computeTaskStats } from "@/lib/utils/dashboard-storage";
 
 const DashboardPage = async () => {
   const session = await auth();
@@ -27,74 +28,16 @@ const DashboardPage = async () => {
     fetchGmailUnreadCount(),
   ]);
 
-  const driveFiles = filesResult.ok ? filesResult.data : [];
-  const calendarEvents = eventsResult.ok ? eventsResult.data : [];
-  const tasks = tasksResult.ok ? tasksResult.data : [];
-  const gmailMessages = gmailResult.ok ? gmailResult.data : [];
+  const driveFiles       = filesResult.ok  ? filesResult.data  : [];
+  const calendarEvents   = eventsResult.ok ? eventsResult.data : [];
+  const tasks            = tasksResult.ok  ? tasksResult.data  : [];
+  const gmailMessages    = gmailResult.ok  ? gmailResult.data  : [];
   const gmailUnreadCount = gmailUnreadResult.ok ? gmailUnreadResult.data : 0;
-  const storageInfo = storageResult.ok
-    ? storageResult.data
-    : { usadoGb: 0, limiteGb: 0, porcentaje: 0 };
+  const storageInfo      = storageResult.ok ? storageResult.data : { usadoGb: 0, limiteGb: 0, porcentaje: 0 };
 
-  const classifyStorage = (mimeType: string) => {
-    if (mimeType.includes("image") || mimeType.includes("video") || mimeType.includes("audio")) {
-      return "Media";
-    }
-    if (
-      mimeType.includes("pdf") ||
-      mimeType.includes("document") ||
-      mimeType.includes("spreadsheet") ||
-      mimeType.includes("presentation") ||
-      mimeType.includes("text")
-    ) {
-      return "Documentos";
-    }
-    return "Otros";
-  };
-
-  const sizeByGroup = driveFiles.reduce<Record<string, number>>((acc, file) => {
-    const group = classifyStorage(file.mimeType);
-    acc[group] = (acc[group] ?? 0) + file.sizeBytes;
-    return acc;
-  }, {});
-
-  const countByGroup = driveFiles.reduce<Record<string, number>>((acc, file) => {
-    const group = classifyStorage(file.mimeType);
-    acc[group] = (acc[group] ?? 0) + 1;
-    return acc;
-  }, {});
-
-  const sizeTotal = Object.values(sizeByGroup).reduce((sum, value) => sum + value, 0);
-  const countTotal = Object.values(countByGroup).reduce((sum, value) => sum + value, 0);
-
-  const storageBreakdown = ["Documentos", "Media", "Otros"].map((label, index) => {
-    const sizeValue = sizeByGroup[label] ?? 0;
-    const countValue = countByGroup[label] ?? 0;
-    const percentage = sizeTotal
-      ? Math.round((sizeValue / sizeTotal) * 100)
-      : countTotal ? Math.round((countValue / countTotal) * 100) : 0;
-    const tones = [
-      "from-indigo-500 to-sky-500",
-      "from-fuchsia-500 to-violet-500",
-      "from-emerald-500 to-cyan-500",
-    ];
-    return {
-      label,
-      percentage,
-      tone: tones[index] ?? tones[0],
-    };
-  });
-
-  const weeklyBars = Array.from({ length: 7 }).map((_, index) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (6 - index));
-
-    const day = date.toISOString().split("T")[0];
-    return calendarEvents.filter((event) => event.inicioIso.startsWith(day)).length;
-  });
-
-  const pendingTasks = tasks.filter((task) => task.estado !== "completada");
-  const completedTasks = tasks.filter((task) => task.estado === "completada");
+  const storageBreakdown = computeStorageBreakdown(driveFiles);
+  const weeklyBars       = computeWeeklyBars(calendarEvents);
+  const taskStats        = computeTaskStats(tasks);
 
   const driveBreakdownChart = storageBreakdown.map((item) => ({
     label: item.label,
@@ -163,7 +106,7 @@ const DashboardPage = async () => {
             </div>
             <div className="rounded-3xl border bg-(--axis-surface) p-5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] overflow-hidden">
               <p className="text-[10px] uppercase tracking-[0.3em] text-(--axis-muted)">Tareas</p>
-              <p className="mt-3 text-3xl font-semibold text-(--axis-text)">{pendingTasks.length}</p>
+              <p className="mt-3 text-3xl font-semibold text-(--axis-text)">{taskStats.pending}</p>
               <p className="mt-1 text-xs text-(--axis-muted)">Pendientes</p>
             </div>
           </div>
@@ -239,9 +182,9 @@ const DashboardPage = async () => {
                 <p className="mt-2 text-lg font-semibold text-(--axis-text)">Buenos dias, {userName}</p>
                 <p className="text-xs text-(--axis-muted)">Eventos de la semana</p>
               </div>
-               <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-semibold text-emerald-600">
-                 {calendarEvents.length}+ eventos
-               </span>
+              <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-semibold text-emerald-600">
+                {calendarEvents.length}+ eventos
+              </span>
             </div>
 
             <div className="mt-6">
@@ -283,7 +226,7 @@ const DashboardPage = async () => {
               </span>
             </div>
             <div className="mt-6">
-              <TaskStatusChart pending={pendingTasks.length} completed={completedTasks.length} />
+              <TaskStatusChart pending={taskStats.pending} completed={taskStats.completed} />
             </div>
           </div>
 
