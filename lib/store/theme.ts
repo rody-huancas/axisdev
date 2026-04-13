@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 type ThemeMode = "light" | "dark";
 
@@ -8,8 +9,15 @@ type ThemeState = {
   toggleTheme: () => void;
 };
 
-export const useThemeStore = create<ThemeState>((set) => ({
-  theme      : "light",
-  setTheme   : (theme) => set({ theme }),
-  toggleTheme: () => set((state) => ({ theme: state.theme === "light" ? "dark" : "light" })),
-}));
+export const useThemeStore = create<ThemeState>()(
+  persist(
+    (set) => ({
+      theme      : "dark",
+      setTheme   : (theme) => set({ theme }),
+      toggleTheme: () => set((state) => ({ theme: state.theme === "light" ? "dark" : "light" })),
+    }),
+    {
+      name: "rody-theme-storage",
+    }
+  )
+);
