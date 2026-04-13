@@ -373,13 +373,13 @@ const DashboardPage = async () => {
               <TaskStatusChart pending={taskStats.pending} completed={taskStats.completed} />
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2 text-center">
-              <div className="rounded-xl bg-amber-50 p-2">
-                <RiTimeLine className="mx-auto h-4 w-4 text-amber-500" />
+              <div className="rounded-xl bg-(--axis-surface-strong) p-2">
+                <RiTimeLine className="mx-auto h-4 w-4 text-(--axis-amber)" />
                 <p className="text-lg font-semibold text-(--axis-text)">{taskStats.pending}</p>
                 <p className="text-[10px] text-(--axis-muted)">Pendientes</p>
               </div>
-              <div className="rounded-xl bg-emerald-50 p-2">
-                <RiCheckLine className="mx-auto h-4 w-4 text-emerald-500" />
+              <div className="rounded-xl bg-(--axis-surface-strong) p-2">
+                <RiCheckLine className="mx-auto h-4 w-4 text-(--axis-emerald)" />
                 <p className="text-lg font-semibold text-(--axis-text)">{taskStats.completed}</p>
                 <p className="text-[10px] text-(--axis-muted)">Completadas</p>
               </div>
