@@ -21,14 +21,15 @@ export const metadata: Metadata = {
   description: "Personal developer dashboard for Google workspace",
 };
 
+const ThemeScript = () => (
+  <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+);
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="es"
-      data-theme="dark"
-    >
+    <html lang="es" data-theme="dark" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <ThemeScript />
       </head>
 
       <body className={cn(poppins.variable, geistMono.variable, "min-h-full flex flex-col antialiased")}>
