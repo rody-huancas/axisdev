@@ -24,7 +24,7 @@ export const UserAuthForm = () => {
   return (
     <div className="w-full">
       <Button
-        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:bg-slate-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:bg-white"
+        className="w-full rounded-2xl border border-white/10 bg-white px-4 py-3 text-white shadow-[0_10px_24px_rgba(99,102,241,0.15)] transition hover:-translate-y-0.5 hover:bg-white/10 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:bg-white"
         disabled={isPending || isRedirecting}
         onClick={handleGoogle}
         aria-busy={isPending || isRedirecting}
@@ -54,7 +54,7 @@ export const UserAuthForm = () => {
           </svg>
           {isPending || isRedirecting ? (
             <span className="flex items-center gap-2">
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900" />
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
               <span>Conectando...</span>
             </span>
           ) : (
