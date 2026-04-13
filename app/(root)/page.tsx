@@ -42,23 +42,18 @@ const HomePage = async () => {
               </span>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               <h1 className="text-4xl font-bold leading-tight tracking-tight text-white lg:text-5xl">
                 Tu Google Workspace,
               </h1>
-              <div className="inline-block">
-                <span className="text-4xl font-bold leading-tight tracking-tight lg:text-5xl" style={{
-                  WebkitTextStroke: '1.5px rgba(99, 102, 241, 0.8)',
-                  color: 'transparent',
-                }}>
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="text-4xl font-bold leading-tight tracking-tight lg:text-5xl bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                   unificado
                 </span>
-              </div>
-              <div className="inline-block ml-3">
-                <span className="text-4xl font-bold leading-tight tracking-tight lg:text-5xl" style={{
-                  WebkitTextStroke: '1.5px rgba(34, 197, 94, 0.8)',
-                  color: 'transparent',
-                }}>
+                <span className="text-4xl font-bold leading-tight tracking-tight lg:text-5xl text-zinc-600">
+                  +
+                </span>
+                <span className="text-4xl font-bold leading-tight tracking-tight lg:text-5xl bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
                   accionable
                 </span>
               </div>
