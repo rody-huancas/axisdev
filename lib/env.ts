@@ -18,6 +18,7 @@ export const env = {
     calendar   : getEnv("NEXT_PUBLIC_GOOGLE_API_CALENDAR"),
     drive      : getEnv("NEXT_PUBLIC_GOOGLE_API_DRIVE"),
     driveUpload: getEnv("NEXT_PUBLIC_GOOGLE_API_DRIVE_UPLOAD"),
+    tasklists  : getEnv("NEXT_PUBLIC_GOOGLE_API_TASKS_LIST"),
     tasks      : getEnv("NEXT_PUBLIC_GOOGLE_API_TASKS"),
     gmail      : getEnv("NEXT_PUBLIC_GOOGLE_API_GMAIL"),
   },

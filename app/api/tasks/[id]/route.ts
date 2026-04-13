@@ -42,6 +42,8 @@ export async function GET(
       estado: data.status === "completed" ? "completada" : "pendiente",
       vence: formatDate(data.due),
       descripcion: data.notes ?? "",
+      parent: data.parent,
+      tasklist: data.tasklistId,
     },
   });
 }
@@ -56,16 +58,24 @@ export async function PATCH(
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const body = await request.json() as { completed?: boolean; title?: string; due?: string; notes?: string };
+  const body = await request.json() as { completed?: boolean; title?: string; due?: string; notes?: string; tasklist?: string };
 
-  const url = new URL(`${env.api.tasks}/${id}`);
+  const baseUrl = env.api.tasks.replace("/lists/@default/tasks", "");
+  const tasklistId = body.tasklist && body.tasklist !== "" ? body.tasklist : "@default";
+  const url = new URL(`${baseUrl}/lists/${tasklistId}/tasks/${id}`);
 
   const updates: Record<string, unknown> = {};
   if (body.completed !== undefined) {
     updates.status = body.completed ? "completed" : "needsAction";
   }
   if (body.title !== undefined) updates.title = body.title;
-  if (body.due !== undefined) updates.due = body.due;
+  if (body.due !== undefined && body.due) {
+    const [y, m, d] = body.due.split("-").map(Number);
+    const date = new Date(y, m - 1, d + 1, 12, 0, 0);
+    updates.due = date.toISOString();
+  } else if (body.due === "") {
+    updates.due = "";
+  }
   if (body.notes !== undefined) updates.notes = body.notes;
 
   const response = await fetch(url.toString(), {
@@ -78,7 +88,9 @@ export async function PATCH(
   });
 
   if (!response.ok) {
-    return new Response(`Google API error: ${response.status}`, { status: 502 });
+    const errorText = await response.text();
+    console.log("PATCH error:", response.status, errorText);
+    return new Response(`Google API error: ${response.status} - ${errorText}`, { status: 502 });
   }
 
   const data = await response.json();
@@ -90,6 +102,8 @@ export async function PATCH(
       estado: data.status === "completed" ? "completada" : "pendiente",
       vence: formatDate(data.due),
       descripcion: data.notes ?? "",
+      parent: data.parent,
+      tasklist: data.tasklistId,
     },
   });
 }
@@ -104,7 +118,10 @@ export async function DELETE(
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const url = new URL(`${env.api.tasks}/${id}`);
+  const body = await request.json() as { tasklist?: string; parent?: string };
+  const tasklistId = body.tasklist || "@default";
+  const baseUrl = env.api.tasks.replace("/lists/@default/tasks", "");
+  const url = new URL(`${baseUrl}/lists/${tasklistId}/tasks/${id}`);
 
   const response = await fetch(url.toString(), {
     method: "DELETE",

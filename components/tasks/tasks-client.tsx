@@ -2,26 +2,18 @@
 
 import { useMemo, useState } from "react";
 import { sileo } from "sileo";
-import { cn } from "@/lib/utils";
 import type { TareaPendiente } from "@/services/google-service";
-import {
-  ITEMS_PER_PAGE,
-  calculatePageCount,
-  filterTasksByStatus,
-  sortTasks,
-} from "@/lib/tasks-utils";
-import { TaskList } from "@/components/tasks/task-list";
-import {
-  RiAddLine,
-  RiArrowLeftLine,
-  RiCheckboxCircleLine,
-  RiCloseLine,
-  RiDeleteBin6Line,
-  RiEditLine,
-  RiMoreLine,
-  RiRefreshLine,
-  RiSearchLine,
-} from "react-icons/ri";
+import { cn } from "@/lib/utils";
+import { TaskItem } from "./components/task-item";
+import { CreateTaskModal } from "./modals/create-task-modal";
+import { TaskDetailModal } from "./modals/task-detail-modal";
+import { calculatePageCount, filterTasksByStatus, sortTasks } from "@/lib/tasks-utils";
+import { RiSearchLine, RiRefreshLine, RiAddLine, RiArrowLeftLine, RiArrowRightLine } from "react-icons/ri";
+
+export type TaskList = {
+  id   : string;
+  title: string;
+};
 
 type TasksClientProps = {
   initialTasks: TareaPendiente[];
@@ -29,19 +21,15 @@ type TasksClientProps = {
 
 export const TasksClient = ({ initialTasks }: TasksClientProps) => {
   const [tasks, setTasks] = useState<TareaPendiente[]>(initialTasks);
-  const [query, setQuery] = useState<string>("");
+  const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | "pendiente" | "completada">("all");
-  const [sort, setSort] = useState<"date" | "alpha" | "status">("date");
-  const [page, setPage] = useState<number>(1);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [selected, setSelected] = useState<TareaPendiente | null>(null);
-  const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
-  const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
-  const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
-  const [newTitle, setNewTitle] = useState<string>("");
-  const [newDue, setNewDue] = useState<string>("");
-  const [editTitle, setEditTitle] = useState<string>("");
-  const [editDue, setEditDue] = useState<string>("");
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const filtered = useMemo(() => {
     let result = tasks;
@@ -50,155 +38,159 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
       result = result.filter((t) => t.titulo.toLowerCase().includes(lower));
     }
     result = filterTasksByStatus(result, status);
-    result = sortTasks(result, sort);
     return result;
-  }, [tasks, query, status, sort]);
+  }, [tasks, query, status]);
 
-  const paginated = useMemo(() => {
-    const start = (page - 1) * ITEMS_PER_PAGE;
-    return filtered.slice(start, start + ITEMS_PER_PAGE);
-  }, [filtered, page]);
+  const sorted = useMemo(() => sortTasks(filtered, "date"), [filtered]);
 
-  const totalPages = calculatePageCount(filtered.length);
+  const mainTasks = sorted;
+
+  const totalPages = calculatePageCount(mainTasks.length);
+
+  const refresh = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/tasks");
+      if (!res.ok) throw new Error();
+      const data = await res.json() as { items: TareaPendiente[] };
+      setTasks(data.items);
+      setPage(1);
+    } catch {
+      sileo.error({ title: "Error al cargar" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreate = async (data: { title: string; due?: string; notes?: string }) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: data.title,
+          due: data.due,
+          notes: data.notes,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      const result = await res.json() as { item: TareaPendiente };
+      setTasks((prev) => [result.item, ...prev]);
+      sileo.success({ title: "Tarea creada" });
+    } catch {
+      sileo.error({ title: "Error al crear" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdate = async (data: { title: string; due?: string; notes?: string }) => {
+    if (!selected) return;
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/tasks/${selected.id}`, {
+        method : "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body   : JSON.stringify({
+          title   : data.title,
+          due     : data.due,
+          notes   : data.notes,
+          tasklist: selected.tasklist,
+          parent  : selected.parent,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      const result = await res.json() as { item: TareaPendiente };
+      setTasks((prev) => prev.map((t) => (t.id === selected.id ? result.item : t)));
+      setSelected(result.item);
+      setIsDetailOpen(false);
+      sileo.success({ title: "Actualizada" });
+    } catch {
+      sileo.error({ title: "Error al actualizar" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleToggle = async (task: TareaPendiente, completed: boolean) => {
+    const taskId = task.id;
+    setTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, estado: completed ? "completada" : "pendiente" } : t)),
+    );
+    
+    sileo.promise(
+      fetch(`/api/tasks/${taskId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ completed, tasklist: task.tasklist }),
+      }).then(async (res) => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      }),
+      {
+        loading: { title: completed ? "Completando..." : "Reabriendo..." },
+        success: { title: completed ? "Completada" : "Abierta" },
+        error: { title: "Error al actualizar" },
+      },
+    );
+  };
+
+  const handleDelete = async () => {
+    if (!selected) return;
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/tasks/${selected.id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tasklist: selected.tasklist, parent: selected.parent }),
+      });
+      if (!res.ok) throw new Error();
+      setTasks((prev) => prev.filter((t) => t.id !== selected.id));
+      setIsDetailOpen(false);
+      setSelected(null);
+      sileo.success({ title: "Eliminada" });
+    } catch {
+      sileo.error({ title: "Error al eliminar" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteFromCard = async (task: TareaPendiente) => {
+    sileo.promise(
+      (async () => {
+        const res = await fetch(`/api/tasks/${task.id}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tasklist: task.tasklist, parent: task.parent }),
+        });
+        if (!res.ok) throw new Error();
+        setTasks((prev) => prev.filter((t) => t.id !== task.id));
+      })(),
+      {
+        loading: { title: "Eliminando..." },
+        success: { title: "Eliminada" },
+        error: { title: "Error al eliminar" },
+      },
+    );
+  };
 
   const openCreate = () => {
-    setNewTitle("");
-    setNewDue("");
     setIsCreateOpen(true);
   };
 
-  const handleCreate = async () => {
-    if (!newTitle.trim()) return;
-    setIsLoading(true);
-    const run = async () => {
-      const response = await fetch("/api/tasks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: newTitle.trim(), due: newDue || undefined }),
-      });
-      if (!response.ok) throw new Error("Error");
-      const data = await response.json() as { item: TareaPendiente };
-      setTasks((prev) => [data.item, ...prev]);
-      setIsCreateOpen(false);
-    };
-    sileo.promise(run(), {
-      loading: { title: "Creando..." },
-      success: { title: "Tarea creada" },
-      error: { title: "Error" },
-    });
-    try {
-      await run();
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleToggle = async (id: string, completed: boolean) => {
-    setIsLoading(true);
-    const run = async () => {
-      const response = await fetch(`/api/tasks/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ completed }),
-      });
-      if (!response.ok) throw new Error("Error");
-      setTasks((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, estado: completed ? "completada" : "pendiente" } : t)),
-      );
-    };
-    sileo.promise(run(), {
-      loading: { title: "Actualizando..." },
-      success: { title: completed ? "Completada" : "Pendiente" },
-      error: { title: "Error" },
-    });
-    try {
-      await run();
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    setIsLoading(true);
-    const run = async () => {
-      const response = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
-      if (!response.ok) throw new Error("Error");
-      setTasks((prev) => prev.filter((t) => t.id !== id));
-      setIsDetailOpen(false);
-      setSelected(null);
-    };
-    sileo.promise(run(), {
-      loading: { title: "Eliminando..." },
-      success: { title: "Eliminada" },
-      error: { title: "Error" },
-    });
-    try {
-      await run();
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleEdit = async () => {
-    if (!selected || !editTitle.trim()) return;
-    setIsLoading(true);
-    const run = async () => {
-      const response = await fetch(`/api/tasks/${selected.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: editTitle.trim(), due: editDue || undefined }),
-      });
-      if (!response.ok) throw new Error("Error");
-      const data = await response.json() as { item: TareaPendiente };
-      setTasks((prev) => prev.map((t) => (t.id === selected.id ? data.item : t)));
-      setSelected(data.item);
-      setIsEditOpen(false);
-    };
-    sileo.promise(run(), {
-      loading: { title: "Guardando..." },
-      success: { title: "Actualizada" },
-      error: { title: "Error" },
-    });
-    try {
-      await run();
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const openDetail = async (task: TareaPendiente) => {
+  const openDetail = (task: TareaPendiente) => {
+    console.log("Opening task detail:", task);
     setSelected(task);
-    setEditTitle(task.titulo);
-    setEditDue(task.vence || "");
     setIsDetailOpen(true);
-  };
-
-  const handleRefresh = async () => {
-    setIsLoading(true);
-    const run = async () => {
-      const response = await fetch("/api/tasks");
-      if (!response.ok) throw new Error("Error");
-      const data = await response.json() as { items: TareaPendiente[] };
-      setTasks(data.items);
-      setPage(1);
-    };
-    sileo.promise(run(), {
-      loading: { title: "Cargando..." },
-      success: { title: "Actualizado" },
-      error: { title: "Error" },
-    });
-    try {
-      await run();
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-4">
         <div className="relative flex-1 lg:max-w-md">
-          <RiSearchLine className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-(--axis-muted)" aria-hidden />
+          <RiSearchLine className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-(--axis-muted)" />
           <input
             value={query}
             onChange={(e) => {
@@ -206,13 +198,13 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
               setPage(1);
             }}
             placeholder="Buscar tareas..."
-            className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) py-3 pl-11 pr-4 text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:border-(--axis-accent) focus:outline-none focus:ring-2 focus:ring-(--axis-accent)/20"
+            className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) py-3 pl-11 pr-4 text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:border-(--axis-accent) focus:outline-none"
           />
         </div>
         <div className="flex gap-2">
           <button
             type="button"
-            onClick={handleRefresh}
+            onClick={refresh}
             disabled={isLoading}
             className="flex h-11 w-11 items-center justify-center rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) text-(--axis-muted) transition hover:bg-(--axis-surface) hover:text-(--axis-accent) disabled:opacity-50"
             title="Actualizar"
@@ -222,9 +214,9 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
           <button
             type="button"
             onClick={openCreate}
-            className="flex items-center gap-2 rounded-2xl bg-(--axis-accent) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:opacity-90"
+            className="flex items-center gap-2 rounded-2xl bg-(--axis-accent) px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:opacity-90"
           >
-            <RiAddLine className="h-4 w-4" />
+            <RiAddLine className="h-5 w-5" />
             Nueva
           </button>
         </div>
@@ -240,7 +232,7 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
               setPage(1);
             }}
             className={cn(
-              "rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition",
+              "rounded-xl px-4 py-2 text-sm font-semibold uppercase tracking-[0.15em] transition",
               status === value
                 ? "bg-(--axis-surface) text-(--axis-text) shadow-sm ring-1 ring-(--axis-border)"
                 : "text-(--axis-muted) hover:text-(--axis-text)",
@@ -251,8 +243,26 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
         ))}
       </div>
 
-      <div className="space-y-2">
-        <TaskList tasks={paginated} onToggle={handleToggle} onSelect={openDetail} />
+      <div className="space-y-6">
+        {mainTasks.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-(--axis-border) bg-(--axis-surface-strong) px-6 py-16 text-center">
+            <RiAddLine className="h-12 w-12 text-(--axis-muted)" />
+            <p className="mt-4 text-base font-semibold text-(--axis-text)">No hay tareas</p>
+            <p className="text-sm text-(--axis-muted)">Crea una nueva tarea para comenzar</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {mainTasks.map((task) => (
+              <TaskItem
+                key={task.id}
+                task={task}
+                onToggle={handleToggle}
+                onDelete={handleDeleteFromCard}
+                onSelect={openDetail}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {totalPages > 1 && (
@@ -261,170 +271,49 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1 || isLoading}
-            className="rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-(--axis-text) transition hover:bg-(--axis-surface) disabled:opacity-50"
+            className="flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-sm font-semibold uppercase tracking-[0.15em] text-(--axis-text) transition hover:bg-(--axis-surface) disabled:opacity-50"
           >
+            <RiArrowLeftLine className="h-4 w-4" />
             Anterior
           </button>
-          <span className="text-xs text-(--axis-muted)">
+          <span className="text-sm text-(--axis-muted)">
             {page} / {totalPages}
           </span>
           <button
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages || isLoading}
-            className="rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-(--axis-text) transition hover:bg-(--axis-surface) disabled:opacity-50"
+            className="flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-sm font-semibold uppercase tracking-[0.15em] text-(--axis-text) transition hover:bg-(--axis-surface) disabled:opacity-50"
           >
             Siguiente
+            <RiArrowRightLine className="h-4 w-4" />
           </button>
         </div>
       )}
 
-      {isCreateOpen && (
-        <div className="fixed inset-0 z-50">
-          <div className="fixed inset-0 bg-black/60" onClick={() => !isLoading && setIsCreateOpen(false)} />
-          <div className="relative z-10 flex h-dvh items-center justify-center p-4">
-            <div className="w-full max-w-md overflow-hidden rounded-3xl border border-(--axis-border) bg-(--axis-surface) shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
-              <div className="flex items-center justify-between border-b border-(--axis-border) px-6 py-4">
-                <h3 className="text-lg font-semibold text-(--axis-text)">Nueva tarea</h3>
-                <button
-                  type="button"
-                  onClick={() => setIsCreateOpen(false)}
-                  className="flex h-9 w-9 items-center justify-center rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) text-(--axis-muted) transition hover:bg-(--axis-surface) hover:text-(--axis-text)"
-                >
-                  <RiCloseLine className="h-5 w-5" />
-                </button>
-              </div>
-              <div className="space-y-4 p-6">
-                <input
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="Titulo de la tarea"
-                  className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3 text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:border-(--axis-accent) focus:outline-none"
-                />
-                <input
-                  type="date"
-                  value={newDue}
-                  onChange={(e) => setNewDue(e.target.value)}
-                  className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3 text-sm text-(--axis-text) focus:border-(--axis-accent) focus:outline-none"
-                />
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsCreateOpen(false)}
-                    className="rounded-2xl border border-(--axis-border) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong)"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCreate}
-                    disabled={isLoading || !newTitle.trim()}
-                    className="rounded-2xl bg-(--axis-accent) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:opacity-90 disabled:opacity-50"
-                  >
-                    Crear
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <CreateTaskModal
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        onCreate={handleCreate}
+        isLoading={isLoading}
+      />
 
-      {isDetailOpen && selected && (
-        <div className="fixed inset-0 z-50">
-          <div className="fixed inset-0 bg-black/60" onClick={() => setIsDetailOpen(false)} />
-          <div className="relative z-10 flex h-dvh items-center justify-center p-4">
-            <div className="w-full max-w-md overflow-hidden rounded-3xl border border-(--axis-border) bg-(--axis-surface) shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
-              <div className="flex items-center justify-between border-b border-(--axis-border) px-6 py-4">
-                <h3 className="text-lg font-semibold text-(--axis-text)">Detalle</h3>
-                <button
-                  type="button"
-                  onClick={() => setIsDetailOpen(false)}
-                  className="flex h-9 w-9 items-center justify-center rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) text-(--axis-muted) transition hover:bg-(--axis-surface) hover:text-(--axis-text)"
-                >
-                  <RiCloseLine className="h-5 w-5" />
-                </button>
-              </div>
-              <div className="space-y-4 p-6">
-                {isEditOpen ? (
-                  <>
-                    <input
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3 text-sm text-(--axis-text) focus:border-(--axis-accent) focus:outline-none"
-                    />
-                    <input
-                      type="date"
-                      value={editDue}
-                      onChange={(e) => setEditDue(e.target.value)}
-                      className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3 text-sm text-(--axis-text) focus:border-(--axis-accent) focus:outline-none"
-                    />
-                    <div className="flex justify-end gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setIsEditOpen(false)}
-                        className="rounded-2xl border border-(--axis-border) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong)"
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleEdit}
-                        disabled={isLoading || !editTitle.trim()}
-                        className="rounded-2xl bg-(--axis-accent) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:opacity-90 disabled:opacity-50"
-                      >
-                        Guardar
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.3em] text-(--axis-accent)">Titulo</p>
-                      <p className={cn("mt-1 text-lg font-semibold text-(--axis-text)", selected.estado === "completada" && "line-through text-(--axis-muted)")}>
-                        {selected.titulo}
-                      </p>
-                    </div>
-                    {selected.vence && (
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.3em] text-(--axis-accent)">Vence</p>
-                        <p className="mt-1 text-sm text-(--axis-text)">{selected.vence}</p>
-                      </div>
-                    )}
-                    <div className="flex justify-between pt-4">
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(selected.id)}
-                        className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-rose-400 transition hover:bg-rose-500/20"
-                      >
-                        <RiDeleteBin6Line className="mr-2 inline h-4 w-4" />
-                        Eliminar
-                      </button>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setIsEditOpen(true)}
-                          className="flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--axis-text) transition hover:bg-(--axis-surface)"
-                        >
-                          <RiEditLine className="h-4 w-4" />
-                          Editar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleToggle(selected.id, selected.estado === "pendiente")}
-                          className="flex items-center gap-2 rounded-2xl bg-(--axis-accent) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:opacity-90"
-                        >
-                          {selected.estado === "pendiente" ? "Completar" : "Reabrir"}
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <TaskDetailModal
+        task={selected}
+        isOpen={isDetailOpen}
+        isEditOpen={isEditOpen}
+        onClose={() => {
+          setIsDetailOpen(false);
+          setIsEditOpen(false);
+          setSelected(null);
+        }}
+        onEditOpen={() => setIsEditOpen(true)}
+        onEditClose={() => setIsEditOpen(false)}
+        onUpdate={handleUpdate}
+        onToggle={(completed) => handleToggle(selected!, completed)}
+        onDelete={handleDelete}
+        isLoading={isLoading}
+      />
     </div>
   );
 };
