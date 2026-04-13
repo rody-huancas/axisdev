@@ -271,6 +271,37 @@ const DashboardPage = async () => {
               ))}
             </div>
           </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-(--axis-text)">Ultimos correos</h3>
+              <Link href="/gmail" className="text-xs font-semibold text-indigo-500 hover:text-indigo-600">
+                Ver todos <RiExternalLinkLine className="inline h-3 w-3" />
+              </Link>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {(gmailMessages.length ? gmailMessages.slice(0, 6) : []).map((message) => (
+                <a
+                  key={message.id}
+                  href={`https://mail.google.com/mail/u/0/#inbox/${message.id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group rounded-2xl border bg-(--axis-surface-strong) p-4 transition hover:bg-(--axis-surface) cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 shrink-0 rounded-full bg-linear-to-br from-red-200 via-orange-200 to-amber-200" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-(--axis-text)">{message.asunto}</p>
+                      <p className="truncate text-xs text-(--axis-muted)">{message.remitente}</p>
+                    </div>
+                  </div>
+                </a>
+              ))}
+              {!gmailMessages.length && (
+                <p className="text-sm text-(--axis-muted)">No hay correos recientes.</p>
+              )}
+            </div>
+          </div>
         </div>
 
         <aside className="space-y-6 min-w-0">
@@ -382,38 +413,6 @@ const DashboardPage = async () => {
               </div>
             </div>
           )}
-
-          <div className="rounded-3xl border bg-(--axis-surface) p-6 shadow-[0_12px_28px_rgba(15,23,42,0.08)] overflow-hidden">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-(--axis-text)">Ultimos correos</h3>
-              <Link href="/gmail" className="text-xs font-semibold text-indigo-500 hover:text-indigo-600">
-                Ver todos
-              </Link>
-            </div>
-            <div className="mt-4 space-y-3">
-              {(gmailMessages.length ? gmailMessages.slice(0, 3) : []).map((message) => (
-                <a
-                  key={message.id}
-                  href={`https://mail.google.com/mail/u/0/#inbox/${message.id}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-between gap-3 rounded-2xl border bg-(--axis-surface-strong) px-3 py-3 transition hover:bg-(--axis-surface) cursor-pointer"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div className="h-10 w-10 shrink-0 rounded-full bg-linear-to-br from-indigo-200 via-purple-200 to-sky-200" />
-                    <div className="min-w-0">
-                      <p className="truncate text-xs font-semibold text-(--axis-text)">{message.asunto}</p>
-                      <p className="truncate text-[10px] text-(--axis-muted)">{message.remitente}</p>
-                    </div>
-                  </div>
-                  <RiExternalLinkLine className="h-4 w-4 shrink-0 text-indigo-400" />
-                </a>
-              ))}
-              {!gmailMessages.length && (
-                <p className="text-sm text-(--axis-muted)">No hay correos recientes.</p>
-              )}
-            </div>
-          </div>
 
           <div className="rounded-3xl border bg-(--axis-surface) p-6 shadow-[0_12px_28px_rgba(15,23,42,0.08)] overflow-hidden">
             <div className="flex items-center justify-between">
