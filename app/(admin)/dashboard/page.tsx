@@ -11,6 +11,10 @@ import { computeStorageBreakdown, computeWeeklyBars, computeTaskStats } from "@/
 import type { TareaPendiente } from "@/lib/types/google-service";
 import { RiMailLine, RiCalendarLine, RiTaskLine, RiDriveLine, RiExternalLinkLine, RiFileLine, RiCheckLine, RiTimeLine } from "react-icons/ri";
 
+const encodeGmailId = (id: string) => {
+  return id.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+};
+
 const getTodayEvents = (events: { inicioIso: string }[]) => {
   const today = new Date().toISOString().split("T")[0];
   return events.filter((e) => e.inicioIso.startsWith(today));
@@ -279,21 +283,21 @@ const DashboardPage = async () => {
                 Ver todos <RiExternalLinkLine className="inline h-3 w-3" />
               </Link>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {(gmailMessages.length ? gmailMessages.slice(0, 5) : []).map((message) => (
                 <a
                   key={message.id}
-                  href={`https://mail.google.com/mail/u/0/#inbox/${message.id}`}
+                  href={`https://mail.google.com/mail/u/0/#inbox/${encodeGmailId(message.id)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-between gap-3 rounded-2xl border bg-(--axis-surface-strong) px-4 py-3 transition hover:bg-(--axis-surface) cursor-pointer"
+                  className="flex items-center gap-3 rounded-2xl border border-(--axis-border) bg-(--axis-surface) p-4 transition hover:border-indigo-300 hover:bg-(--axis-surface-strong) cursor-pointer"
                 >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="h-10 w-10 shrink-0 rounded-full bg-linear-to-br from-red-200 via-orange-200 to-amber-200" />
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-(--axis-text)">{message.asunto}</p>
-                      <p className="truncate text-xs text-(--axis-muted)">{message.remitente}</p>
-                    </div>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100">
+                    <RiMailLine className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <p className="truncate text-sm font-semibold text-(--axis-text)">{message.asunto}</p>
+                    <p className="truncate text-xs text-(--axis-muted)">{message.remitente}</p>
                   </div>
                   <RiExternalLinkLine className="h-4 w-4 shrink-0 text-indigo-400" />
                 </a>
