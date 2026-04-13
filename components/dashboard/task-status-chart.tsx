@@ -38,8 +38,8 @@ export const TaskStatusChart = ({ pending, completed }: TaskStatusChartProps) =>
               paddingAngle={3}
               stroke="rgba(148,163,184,0.18)"
             >
-              <Cell fill="#f59e0b" />
-              <Cell fill="#34d399" />
+              <Cell fill="var(--axis-amber)" />
+              <Cell fill="var(--axis-emerald)" />
             </Pie>
           </PieChart>
         </ResponsiveContainer>

@@ -12,6 +12,8 @@
   --axis-muted: #94a3b8;
   --axis-accent: #7b5cff;
   --axis-accent-2: #38bdf8;
+  --axis-amber: #f59e0b;
+  --axis-emerald: #34d399;
 }
 
 :root[data-theme="light"] {
@@ -25,6 +27,8 @@
   --axis-muted: #64748b;
   --axis-accent: #6c63ff;
   --axis-accent-2: #60a5fa;
+  --axis-amber: #d97706;
+  --axis-emerald: #059669;
 }
 
 .axis-logout {
