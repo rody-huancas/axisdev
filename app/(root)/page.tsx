@@ -18,7 +18,7 @@ const HomePage = async () => {
       </div>
 
       <section className="flex w-full max-w-6xl flex-col gap-12 px-6 py-8 lg:flex-row lg:items-center lg:gap-20">
-        <div className="space-y-10 lg:flex-1">
+        <div className="space-y-10 lg:flex-1 lg:min-w-0">
           <div className="flex items-center gap-3">
             <Image
               src="/icon-axisdev.png"
@@ -31,7 +31,7 @@ const HomePage = async () => {
             <span className="text-2xl font-bold text-white">AxisDev</span>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -42,12 +42,27 @@ const HomePage = async () => {
               </span>
             </div>
 
-            <h1 className="text-4xl font-bold leading-tight tracking-tight text-white lg:text-5xl">
-              Tu Google Workspace,
-              <span className="block mt-2 bg-linear-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-[length:_200%_auto] bg-clip-text text-transparent">
-                unificado y accionable.
-              </span>
-            </h1>
+            <div className="space-y-4">
+              <h1 className="text-4xl font-bold leading-tight tracking-tight text-white lg:text-5xl">
+                Tu Google Workspace,
+              </h1>
+              <div className="inline-block">
+                <span className="text-4xl font-bold leading-tight tracking-tight lg:text-5xl" style={{
+                  WebkitTextStroke: '1.5px rgba(99, 102, 241, 0.8)',
+                  color: 'transparent',
+                }}>
+                  unificado
+                </span>
+              </div>
+              <div className="inline-block ml-3">
+                <span className="text-4xl font-bold leading-tight tracking-tight lg:text-5xl" style={{
+                  WebkitTextStroke: '1.5px rgba(34, 197, 94, 0.8)',
+                  color: 'transparent',
+                }}>
+                  accionable
+                </span>
+              </div>
+            </div>
 
             <p className="max-w-md text-base text-zinc-400 leading-relaxed">
               Centraliza Drive, Calendar, Tasks y Gmail con una vista clara del
