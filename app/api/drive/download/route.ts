@@ -68,8 +68,8 @@ const exportMap: Record<string, { mime: string; ext: string }> = {
   },
 };
 
-const isFolder = (mimeType: string) => mimeType === "application/vnd.google-apps.folder";
-const isShortcut = (mimeType: string) => mimeType === "application/vnd.google-apps.shortcut";
+const isFolder              = (mimeType: string) => mimeType === "application/vnd.google-apps.folder";
+const isShortcut            = (mimeType: string) => mimeType === "application/vnd.google-apps.shortcut";
 const isGoogleWorkspaceFile = (mimeType: string) => mimeType.startsWith("application/vnd.google-apps.") && !isFolder(mimeType) && !isShortcut(mimeType);
 
 const sanitizeName = (name: string) => name.replaceAll("/", "-");
@@ -143,19 +143,13 @@ const listChildren = async (folderId: string, token: string) => {
   return items;
 };
 
-const collectEntries = async (
-  item: DriveItem,
-  token: string,
-  prefix: string,
-  entries: FileEntry[],
-  emptyDirs: string[],
-) => {
+const collectEntries = async (item: DriveItem, token: string, prefix: string, entries: FileEntry[], emptyDirs: string[]) => {
   if (!isFolder(item.mimeType)) {
     entries.push({
-      id: item.id,
-      name: item.name,
+      id      : item.id,
+      name    : item.name,
       mimeType: item.mimeType,
-      path: `${prefix}${item.name}`,
+      path    : `${prefix}${item.name}`,
     });
     return;
   }
@@ -228,7 +222,7 @@ export async function POST(request: Request) {
     }
 
     const entries: FileEntry[] = [];
-    const emptyDirs: string[] = [];
+    const emptyDirs: string[]  = [];
 
     for (const item of items) {
       await collectEntries(item, token, "", entries, emptyDirs);
