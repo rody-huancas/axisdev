@@ -10,22 +10,17 @@ type SelectOption = {
 };
 
 type CustomSelectProps = {
-  value: string;
-  onChange: (value: string) => void;
-  options: SelectOption[];
+  value       : string;
+  onChange    : (value: string) => void;
+  options     : SelectOption[];
   placeholder?: string;
-  className?: string;
-  disabled?: boolean;
+  className  ?: string;
+  disabled   ?: boolean;
 };
 
-export const CustomSelect = ({
-  value,
-  onChange,
-  options,
-  placeholder = "Seleccionar...",
-  className,
-  disabled,
-}: CustomSelectProps) => {
+export const CustomSelect = (props: CustomSelectProps) => {
+  const { value, onChange, options, placeholder = "Seleccionar...", className, disabled } = props;
+
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 

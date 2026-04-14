@@ -37,9 +37,9 @@ const parseDisplayDateToInput = (displayDate: string): string => {
 export const TaskDetailModal = (props: Props) => {
   const { task, isOpen, isEditOpen, onClose, onEditOpen, onEditClose, onUpdate, onToggle, onDelete, isLoading } = props;
 
-  const [editTitle, setEditTitle] = useState("");
-  const [editDue, setEditDue] = useState("");
-  const [editNotes, setEditNotes] = useState("");
+  const [editTitle, setEditTitle] = useState<string>("");
+  const [editDue  , setEditDue  ] = useState<string>("");
+  const [editNotes, setEditNotes] = useState<string>("");
 
   useEffect(() => {
     if (task && isEditOpen) {
@@ -61,7 +61,7 @@ export const TaskDetailModal = (props: Props) => {
     if (!editTitle.trim()) return;
     await onUpdate({
       title: editTitle.trim(),
-      due: editDue || undefined,
+      due  : editDue || undefined,
       notes: editNotes || undefined,
     });
     handleClose();

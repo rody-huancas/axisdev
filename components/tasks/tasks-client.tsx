@@ -20,16 +20,15 @@ type TasksClientProps = {
 };
 
 export const TasksClient = ({ initialTasks }: TasksClientProps) => {
-  const [tasks, setTasks] = useState<TareaPendiente[]>(initialTasks);
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState<"all" | "pendiente" | "completada">("all");
-  const [page, setPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const [selected, setSelected] = useState<TareaPendiente | null>(null);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [tasks       , setTasks       ] = useState<TareaPendiente[]>(initialTasks);
+  const [query       , setQuery       ] = useState<string>("");
+  const [status      , setStatus      ] = useState<"all" | "pendiente" | "completada">("all");
+  const [page        , setPage        ] = useState<number>(1);
+  const [isLoading   , setIsLoading   ] = useState<boolean>(false);
+  const [selected    , setSelected    ] = useState<TareaPendiente | null>(null);
+  const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
+  const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
+  const [isEditOpen  , setIsEditOpen  ] = useState<boolean>(false);
 
   const filtered = useMemo(() => {
     let result = tasks;
@@ -66,11 +65,11 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
     setIsLoading(true);
     try {
       const res = await fetch("/api/tasks", {
-        method: "POST",
+        method : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body   : JSON.stringify({
           title: data.title,
-          due: data.due,
+          due  : data.due,
           notes: data.notes,
         }),
       });
@@ -121,9 +120,9 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
     
     sileo.promise(
       fetch(`/api/tasks/${taskId}`, {
-        method: "PATCH",
+        method : "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ completed, tasklist: task.tasklist }),
+        body   : JSON.stringify({ completed, tasklist: task.tasklist }),
       }).then(async (res) => {
         if (!res.ok) throw new Error();
         return res.json();
@@ -131,7 +130,7 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
       {
         loading: { title: completed ? "Completando..." : "Reabriendo..." },
         success: { title: completed ? "Completada" : "Abierta" },
-        error: { title: "Error al actualizar" },
+        error  : { title: "Error al actualizar" },
       },
     );
   };

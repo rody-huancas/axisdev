@@ -13,8 +13,7 @@ type FilePreviewModalProps = {
 const isImage      = (mimeType: string) => mimeType.startsWith("image/");
 const isFolder     = (mimeType: string) => mimeType === "application/vnd.google-apps.folder";
 const isPdf        = (mimeType: string) => mimeType === "application/pdf";
-const isOfficeFile = (mimeType: string) =>
-  mimeType.includes("msword") ||
+const isOfficeFile = (mimeType: string) => mimeType.includes("msword") ||
   mimeType.includes("wordprocessingml") ||
   mimeType.includes("presentation") ||
   mimeType.includes("powerpoint");

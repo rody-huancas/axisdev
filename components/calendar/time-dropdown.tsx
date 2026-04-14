@@ -3,13 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { RiArrowDownSLine } from "react-icons/ri";
 import { cn } from "@/lib/utils";
-import { buildTimeOptions } from "@/lib/calendar-utils";
 
 type TimeDropdownProps = {
-  label: string;
-  value: string;
-  options: string[];
-  onChange: (value: string) => void;
+  label    : string;
+  value    : string;
+  options  : string[];
+  onChange : (value: string) => void;
   disabled?: boolean;
 };
 
@@ -21,7 +20,9 @@ export const TimeDropdown = ({ label, value, options, onChange, disabled }: Time
     if (!open) return;
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target as Node | null;
+
       if (!target) return;
+      
       if (ref.current && !ref.current.contains(target)) {
         setOpen(false);
       }
