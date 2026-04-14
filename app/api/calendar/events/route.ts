@@ -4,15 +4,15 @@ import { env } from "@/lib/env";
 export const runtime = "nodejs";
 
 type CalendarApiEvent = {
-  id: string;
-  title: string;
-  start: string;
-  end: string;
-  meetLink?: string | null;
-  htmlLink?: string | null;
-  location?: string | null;
+  id          : string;
+  title       : string;
+  start       : string;
+  end         : string;
+  meetLink   ?: string | null;
+  htmlLink   ?: string | null;
+  location   ?: string | null;
   description?: string | null;
-  attendees?: string[];
+  attendees  ?: string[];
 };
 
 const calendarEndpoint = env.api.calendar;
@@ -54,7 +54,8 @@ const toEndIso = (dateTime?: string, date?: string) => {
 const extractMeetLink = (event: { hangoutLink?: string; conferenceData?: { entryPoints?: Array<{ entryPointType?: string; uri?: string }> } }) => {
   if (event.hangoutLink) return event.hangoutLink;
   const entryPoints = event.conferenceData?.entryPoints ?? [];
-  const video = entryPoints.find((entry) => entry.entryPointType === "video");
+  const video       = entryPoints.find((entry) => entry.entryPointType === "video");
+
   return video?.uri ?? null;
 };
 
@@ -89,32 +90,32 @@ export async function GET(request: Request) {
 
   const data = (await response.json()) as {
     items?: Array<{
-      id: string;
-      summary?: string;
-      start?: { dateTime?: string; date?: string };
-      end?: { dateTime?: string; date?: string };
-      hangoutLink?: string;
+      id             : string;
+      summary       ?: string;
+      start         ?: { dateTime?: string; date?: string };
+      end           ?: { dateTime?: string; date?: string };
+      hangoutLink   ?: string;
       conferenceData?: { entryPoints?: Array<{ entryPointType?: string; uri?: string }> };
-      htmlLink?: string;
-      location?: string;
-      description?: string;
-      attendees?: Array<{ email?: string; displayName?: string; responseStatus?: string }>;
+      htmlLink      ?: string;
+      location      ?: string;
+      description   ?: string;
+      attendees     ?: Array<{ email?: string; displayName?: string; responseStatus?: string }>;
     }>;
   };
 
   const items = (data.items ?? []).map((event) => {
     const startIso = toIso(event.start?.dateTime, event.start?.date);
-    const endIso = toEndIso(event.end?.dateTime, event.end?.date);
+    const endIso   = toEndIso(event.end?.dateTime, event.end?.date);
     return {
-      id: event.id,
-      title: event.summary ?? "(Sin titulo)",
-      start: startIso,
-      end: endIso,
-      meetLink: extractMeetLink(event),
-      htmlLink: event.htmlLink ?? null,
-      location: event.location ?? null,
+      id         : event.id,
+      title      : event.summary ?? "(Sin titulo)",
+      start      : startIso,
+      end        : endIso,
+      meetLink   : extractMeetLink(event),
+      htmlLink   : event.htmlLink ?? null,
+      location   : event.location ?? null,
       description: event.description ?? null,
-      attendees: (event.attendees ?? []).map((attendee) => attendee.email).filter(Boolean) as string[],
+      attendees  : (event.attendees ?? []).map((attendee) => attendee.email).filter(Boolean) as string[],
     } satisfies CalendarApiEvent;
   });
 
@@ -128,18 +129,18 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json()) as {
-    title?: string;
+    title      ?: string;
     description?: string;
-    location?: string;
-    start?: string;
-    end?: string;
-    attendees?: string[];
-    createMeet?: boolean;
+    location   ?: string;
+    start      ?: string;
+    end        ?: string;
+    attendees  ?: string[];
+    createMeet ?: boolean;
   };
 
   const title = (body.title ?? "").trim();
   const start = body.start ?? "";
-  const end = body.end ?? "";
+  const end   = body.end ?? "";
 
   if (!title || !start || !end) {
     return new Response("Missing title/start/end", { status: 400 });
@@ -159,12 +160,12 @@ export async function POST(request: Request) {
   }
 
   const payload: any = {
-    summary: title,
+    summary    : title,
     description: body.description?.trim() || undefined,
-    location: body.location?.trim() || undefined,
-    start: { dateTime: start },
-    end: { dateTime: end },
-    attendees: attendees.map((email) => ({ email })),
+    location   : body.location?.trim() || undefined,
+    start      : { dateTime: start },
+    end        : { dateTime: end },
+    attendees  : attendees.map((email) => ({ email })),
   };
 
   if (body.createMeet) {
@@ -190,23 +191,23 @@ export async function POST(request: Request) {
     return new Response(await googleError(response), { status });
   }
 
-  const created = (await response.json()) as any;
+  const created      = (await response.json()) as any;
   const createdStart = toIso(created?.start?.dateTime, created?.start?.date);
-  const createdEnd = toEndIso(created?.end?.dateTime, created?.end?.date);
+  const createdEnd   = toEndIso(created?.end?.dateTime, created?.end?.date);
 
   const createdAttendees = (created?.attendees ?? []) as Array<{ email?: string }>;
-  const attendeeEmails = (createdAttendees.length ? createdAttendees.map((a) => a.email) : attendees).filter(Boolean) as string[];
+  const attendeeEmails   = (createdAttendees.length ? createdAttendees.map((a) => a.email) : attendees).filter(Boolean) as string[];
 
   const item: CalendarApiEvent = {
-    id: created?.id,
-    title: created?.summary ?? title,
-    start: createdStart,
-    end: createdEnd,
-    meetLink: created?.hangoutLink ?? null,
-    htmlLink: created?.htmlLink ?? null,
-    location: created?.location ?? null,
+    id         : created?.id,
+    title      : created?.summary ?? title,
+    start      : createdStart,
+    end        : createdEnd,
+    meetLink   : created?.hangoutLink ?? null,
+    htmlLink   : created?.htmlLink    ?? null,
+    location   : created?.location    ?? null,
     description: created?.description ?? null,
-    attendees: attendeeEmails,
+    attendees  : attendeeEmails,
   };
 
   return Response.json({ item });

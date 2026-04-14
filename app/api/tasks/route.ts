@@ -20,9 +20,9 @@ export async function GET(request: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const params = new URL(request.url).searchParams;
+  const params        = new URL(request.url).searchParams;
   const tasklistParam = params.get("tasklist");
-  const baseUrl = env.api.tasks.replace("/lists/@default/tasks", "");
+  const baseUrl       = env.api.tasks.replace("/lists/@default/tasks", "");
 
   const allItems: Array<{ id?: string; title?: string; status?: string; due?: string; notes?: string; parent?: string; tasklistId?: string }> = [];
 
@@ -73,13 +73,13 @@ export async function GET(request: Request) {
   }
 
   const items = allItems.map((task) => ({
-    id        : task.id ?? "",
-    titulo    : task.title ?? "Tarea sin titulo",
-    estado   : task.status === "completed" ? "completada" : "pendiente",
-    vence    : formatDate(task.due),
+    id         : task.id ?? "",
+    titulo     : task.title ?? "Tarea sin titulo",
+    estado     : task.status === "completed" ? "completada": "pendiente",
+    vence      : formatDate(task.due),
     descripcion: task.notes ?? "",
-    parent  : task.parent,
-    tasklist: task.tasklistId,
+    parent     : task.parent,
+    tasklist   : task.tasklistId,
   }));
 
   return Response.json({ items });
@@ -133,13 +133,13 @@ export async function POST(request: Request) {
 
   return Response.json({
     item: {
-      id: created.id ?? "",
-      titulo: created.title ?? body.title,
-      estado: "pendiente",
-      vence: formatDate(created.due),
+      id         : created.id    ?? "",
+      titulo     : created.title ?? body.title,
+      estado     : "pendiente",
+      vence      : formatDate(created.due),
       descripcion: created.notes ?? "",
-      parent: created.parent,
-      tasklist: created.tasklistId,
+      parent     : created.parent,
+      tasklist   : created.tasklistId,
     },
   });
 }

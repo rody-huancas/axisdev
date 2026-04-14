@@ -24,12 +24,12 @@ export const UserAuthForm = () => {
   return (
     <div className="w-full">
       <Button
-        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:bg-slate-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:bg-white"
+        className="w-full rounded-xl border border-white/20 bg-slate-900 py-2.5 text-slate-50 shadow-lg transition hover:bg-slate-950 hover:scale-[1.02] active:scale-[0.98] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
         disabled={isPending || isRedirecting}
         onClick={handleGoogle}
         aria-busy={isPending || isRedirecting}
       >
-        <span className="flex items-center justify-center gap-3">
+        <span className="flex items-center justify-center gap-2.5">
           <svg
             aria-hidden="true"
             viewBox="0 0 48 48"
@@ -58,7 +58,7 @@ export const UserAuthForm = () => {
               <span>Conectando...</span>
             </span>
           ) : (
-            <span>Continuar con Google</span>
+            <span className="text-sm font-medium">Continuar con Google</span>
           )}
         </span>
       </Button>

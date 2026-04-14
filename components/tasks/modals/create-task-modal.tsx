@@ -11,9 +11,9 @@ type Props = {
 };
 
 export const CreateTaskModal = ({ isOpen, onClose, onCreate, isLoading }: Props) => {
-  const [title, setTitle] = useState("");
-  const [due, setDue] = useState("");
-  const [notes, setNotes] = useState("");
+  const [title, setTitle] = useState<string>("");
+  const [due  , setDue  ] = useState<string>("");
+  const [notes, setNotes] = useState<string>("");
 
   if (!isOpen) return null;
 
@@ -21,7 +21,7 @@ export const CreateTaskModal = ({ isOpen, onClose, onCreate, isLoading }: Props)
     if (!title.trim()) return;
     await onCreate({
       title: title.trim(),
-      due: due || undefined,
+      due  : due || undefined,
       notes: notes || undefined,
     });
     handleClose();
