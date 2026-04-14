@@ -1,39 +1,40 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { RiCloseLine, RiExternalLinkLine } from "react-icons/ri";
+import { useMemo } from "react";
+import { RiCloseLine } from "react-icons/ri";
 import { cn } from "@/lib/utils";
 import { TimeDropdown } from "./time-dropdown";
-import { ApiEvent, timeToMinutes, minutesToTime, formatDateValue, combineLocalDateTime, buildTimeOptions } from "@/lib/calendar-utils";
+import { timeToMinutes, minutesToTime, buildTimeOptions } from "@/lib/calendar-utils";
 
 type CreateModalProps = {
-  isOpen: boolean;
-  isLoading: boolean;
-  onClose: () => void;
-  onCreate: () => Promise<void>;
-  createTitle: string;
-  setCreateTitle: (v: string) => void;
-  createDate: string;
-  setCreateDate: (v: string) => void;
-  createStartTime: string;
-  setCreateStartTime: (v: string) => void;
-  createEndTime: string;
-  setCreateEndTime: (v: string) => void;
-  createDayPart: "morning" | "afternoon";
-  setCreateDayPart: (v: "morning" | "afternoon") => void;
-  createLocation: string;
-  setCreateLocation: (v: string) => void;
-  createDescription: string;
+  isOpen              : boolean;
+  isLoading           : boolean;
+  onClose             : () => void;
+  onCreate            : () => Promise<void>;
+  createTitle         : string;
+  setCreateTitle      : (v: string) => void;
+  createDate          : string;
+  setCreateDate       : (v: string) => void;
+  createStartTime     : string;
+  setCreateStartTime  : (v: string) => void;
+  createEndTime       : string;
+  setCreateEndTime    : (v: string) => void;
+  createDayPart       : "morning" | "afternoon";
+  setCreateDayPart    : (v: "morning" | "afternoon") => void;
+  createLocation      : string;
+  setCreateLocation   : (v: string) => void;
+  createDescription   : string;
   setCreateDescription: (v: string) => void;
-  createAttendees: string;
-  setCreateAttendees: (v: string) => void;
-  createMeet: boolean;
-  setCreateMeet: (v: boolean) => void;
+  createAttendees     : string;
+  setCreateAttendees  : (v: string) => void;
+  createMeet          : boolean;
+  setCreateMeet       : (v: boolean) => void;
 };
 
 const syncEndAfterStart = (start: string, prevEnd: string) => {
   const startMin = timeToMinutes(start);
-  const endMin = timeToMinutes(prevEnd);
+  const endMin   = timeToMinutes(prevEnd);
+
   if (Number.isNaN(startMin) || Number.isNaN(endMin)) return prevEnd;
   if (endMin <= startMin) {
     return minutesToTime(Math.min(startMin + 30, 23 * 60 + 30));
@@ -41,38 +42,43 @@ const syncEndAfterStart = (start: string, prevEnd: string) => {
   return prevEnd;
 };
 
-export const CreateEventModal = ({
-  isOpen,
-  isLoading,
-  onClose,
-  onCreate,
-  createTitle,
-  setCreateTitle,
-  createDate,
-  setCreateDate,
-  createStartTime,
-  setCreateStartTime,
-  createEndTime,
-  setCreateEndTime,
-  createDayPart,
-  setCreateDayPart,
-  createLocation,
-  setCreateLocation,
-  createDescription,
-  setCreateDescription,
-  createAttendees,
-  setCreateAttendees,
-  createMeet,
-  setCreateMeet,
-}: CreateModalProps) => {
+export const CreateEventModal = (props: CreateModalProps) => {
+  const {
+    isOpen,
+    isLoading,
+    onClose,
+    onCreate,
+    createTitle,
+    setCreateTitle,
+    createDate,
+    setCreateDate,
+    createStartTime,
+    setCreateStartTime,
+    createEndTime,
+    setCreateEndTime,
+    createDayPart,
+    setCreateDayPart,
+    createLocation,
+    setCreateLocation,
+    createDescription,
+    setCreateDescription,
+    createAttendees,
+    setCreateAttendees,
+    createMeet,
+    setCreateMeet,
+  } = props;
+
+
   const startOptions = useMemo(() => {
     const all = buildTimeOptions(6 * 60, 22 * 60 + 30, 30);
+    
     if (createDayPart === "morning") {
       return all.filter((value) => {
         const minutes = timeToMinutes(value);
         return minutes >= 6 * 60 && minutes < 12 * 60;
       });
     }
+
     return all.filter((value) => {
       const minutes = timeToMinutes(value);
       return minutes >= 12 * 60 && minutes <= 22 * 60;
@@ -81,7 +87,8 @@ export const CreateEventModal = ({
 
   const endOptions = useMemo(() => {
     const startMinutes = timeToMinutes(createStartTime);
-    const all = buildTimeOptions(6 * 60, 23 * 60 + 30, 30);
+    const all          = buildTimeOptions(6 * 60, 23 * 60 + 30, 30);
+
     return all.filter((value) => {
       const minutes = timeToMinutes(value);
       return !Number.isNaN(startMinutes) && minutes > startMinutes;

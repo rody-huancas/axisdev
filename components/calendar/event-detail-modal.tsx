@@ -4,9 +4,9 @@ import { RiExternalLinkLine } from "react-icons/ri";
 import { ApiEvent } from "@/lib/calendar-utils";
 
 type EventDetailModalProps = {
-  isOpen: boolean;
+  isOpen  : boolean;
   selected: ApiEvent | null;
-  onClose: () => void;
+  onClose : () => void;
 };
 
 export const EventDetailModal = ({ isOpen, selected, onClose }: EventDetailModalProps) => {
