@@ -4,7 +4,7 @@ import { env } from "@/lib/env";
 export const runtime = "nodejs";
 
 export type TaskList = {
-  id: string;
+  id   : string;
   title: string;
 };
 
@@ -48,9 +48,9 @@ export async function POST(request: Request) {
   const url = new URL(env.api.tasklists);
 
   const response = await fetch(url.toString(), {
-    method: "POST",
+    method : "POST",
     headers: {
-      Authorization: `Bearer ${session.accessToken}`,
+      Authorization : `Bearer ${session.accessToken}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ title: body.title.trim() }),
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
 
   return Response.json({
     item: {
-      id: created.id ?? "",
+      id   : created.id ?? "",
       title: created.title ?? body.title,
     },
   });
