@@ -27,7 +27,7 @@
 
 | Landing                        | Dashboard                          |
 | ------------------------------ | ---------------------------------- |
-| ![Landing](readme/landing.png) | ![Dashboard](readme/dashboard.png) |
+| ![Landing](public/readme/landing.png) | ![Dashboard](public/readme/dashboard.png) |
 
 ---
 
