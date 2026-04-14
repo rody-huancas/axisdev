@@ -25,9 +25,13 @@
 
 ## Vista previa
 
-| Landing                        | Dashboard                          |
-| ------------------------------ | ---------------------------------- |
-| ![Landing](public/readme/landing.png) | ![Dashboard](public/readme/dashboard.png) |
+| Landing                        |
+| ------------------------------ |
+| ![Landing](public/readme/landing.png) |
+
+| Dashboard                          |
+| ---------------------------------- |
+| ![Dashboard](public/readme/dashboard.png) |
 
 ---
 
