@@ -24,7 +24,7 @@ export const UserAuthForm = () => {
   return (
     <div className="w-full">
       <Button
-        className="w-full rounded-xl border border-white/20 bg-white py-2.5 text-slate-900 shadow-lg transition hover:bg-slate-100 hover:scale-[1.02] active:scale-[0.98] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full rounded-xl border border-white/20 bg-slate-900 py-2.5 text-slate-50 shadow-lg transition hover:bg-slate-950 hover:scale-[1.02] active:scale-[0.98] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
         disabled={isPending || isRedirecting}
         onClick={handleGoogle}
         aria-busy={isPending || isRedirecting}
