@@ -63,7 +63,6 @@ AxisDev es un panel de control que actúa como una **capa superior sobre Google 
 | Estilos         | Tailwind CSS v4                |
 | Autenticación   | Auth.js (NextAuth) + OAuth 2.0 |
 | Base de datos   | Supabase                       |
-| Componentes     | Shadcn UI / Radix UI           |
 | Estado          | Zustand                        |
 | Formularios     | React Hook Form + Zod          |
 | Gráficos        | Recharts                       |
