@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 
 import { auth } from "@/auth";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DriveBreakdownChart } from "@/components/dashboard/drive-breakdown-chart";
 import { LearningCharts } from "@/components/dashboard/learning-charts";
 import { TaskStatusChart } from "@/components/dashboard/task-status-chart";
@@ -71,8 +70,6 @@ const DashboardPage = async () => {
 
   return (
     <section className="space-y-6">
-      <DashboardHeader userName={userName} userEmail={userEmail} userImage={userImage} />
-
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-6 min-w-0">
           <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#6C63FF] via-[#5A7BFF] to-[#4DA2FF] p-6 text-white shadow-[0_18px_36px_rgba(108,99,255,0.28)] sm:p-8">

@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { env } from "@/lib/env";
 import { auth } from "@/auth";
 import { CalendarClient } from "@/components/calendar/calendar-client";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { getDefaultCalendarFetchRange } from "@/lib/calendar-date-range";
 import { toIso, toEndIso, extractMeetLink, type ApiEvent } from "@/lib/utils/calendar-transform";
 
@@ -66,12 +65,6 @@ const CalendarPage = async () => {
 
   return (
     <section className="space-y-6">
-      <DashboardHeader
-        userName={session.user?.name?.split(" ")[0] ?? "Usuario"}
-        userEmail={session.user?.email ?? null}
-        userImage={session.user?.image ?? null}
-      />
-
       <CalendarClient initialItems={initialItems} />
     </section>
   );

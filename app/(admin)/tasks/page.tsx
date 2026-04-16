@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { TasksClient } from "@/components/tasks/tasks-client";
 import { fetchTaskList } from "@/services";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 
 export const dynamic = "force-dynamic";
 
@@ -21,12 +20,6 @@ const TasksPage = async () => {
 
   return (
     <section className="space-y-6">
-      <DashboardHeader
-        userName={session.user?.name?.split(" ")[0] ?? "Usuario"}
-        userEmail={session.user?.email ?? null}
-        userImage={session.user?.image ?? null}
-      />
-
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-muted">Tareas</p>
