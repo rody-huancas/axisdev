@@ -18,7 +18,7 @@ const AdminLayout = async ({ children }: Readonly<{ children: ReactNode }>) => {
   return (
     <AdminShell>
       <DashboardHeader userName={userName} userEmail={userEmail} userImage={userImage} />
-      {children}
+      <div className="mt-6">{children}</div>
     </AdminShell>
   );
 };
