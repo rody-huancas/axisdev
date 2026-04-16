@@ -569,7 +569,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
               </div>
 
               {uploadFiles.length > 0 && (
-                <div className="max-h-40 space-y-2 overflow-auto rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) p-3">
+                <div className="max-h-52 space-y-2 overflow-auto rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) p-3">
                   {uploadFiles.map((file) => (
                     <div key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center justify-between gap-4 text-xs text-(--axis-text)">
                       <span className="truncate font-medium">{file.name}</span>
@@ -579,7 +579,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                           type="button"
                           onClick={() => handleRemoveUpload(file)}
                           disabled={isUploading}
-                          className="rounded-full border border-(--axis-border) px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface) disabled:opacity-50"
+                          className="rounded-xl py-1 px-2 text-white bg-red-500 transition hover:bg-red-600 disabled:opacity-50 cursor-pointer"
                         >
                           Quitar
                         </button>
