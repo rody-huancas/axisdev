@@ -1,23 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { 
-  RiGlobeLine, 
-  RiLayoutGridLine, 
-  RiCheckLine, 
-  RiMailLine, 
-  RiFileLine, 
-  RiCloudLine, 
-  RiCalendarLine, 
-  RiTaskLine,
-  RiNotification3Line,
-  RiPushpinLine,
-  RiEyeLine,
-  RiInformationLine,
-  RiShieldCheckLine,
-  RiLockLine,
-  RiGoogleFill
-} from "react-icons/ri";
+import { useState, useEffect, useTransition } from "react";
+import { cn } from "@/lib/utils";
+import {  RiGlobeLine,  RiLayoutGridLine,  RiCheckLine,  RiMailLine,  RiFileLine,  RiCloudLine,  RiCalendarLine,  RiTaskLine, RiNotification3Line, RiInformationLine, RiGoogleFill, RiLoader4Line } from "react-icons/ri";
 
 const languages = [
   { code: "es", name: "Español", flag: "🇪🇸" },
@@ -25,17 +10,17 @@ const languages = [
 ];
 
 const dashboardWidgets = [
-  { id: "gmail", label: "Correos recientes", icon: <RiMailLine className="h-4 w-4" />, enabled: true },
-  { id: "tasks", label: "Tareas pendientes", icon: <RiTaskLine className="h-4 w-4" />, enabled: true },
-  { id: "calendar", label: "Eventos de hoy", icon: <RiCalendarLine className="h-4 w-4" />, enabled: true },
-  { id: "storage", label: "Almacenamiento", icon: <RiCloudLine className="h-4 w-4" />, enabled: true },
-  { id: "recentFiles", label: "Archivos recientes", icon: <RiFileLine className="h-4 w-4" />, enabled: false },
+  { id: "gmail", label: "Correos recientes", icon: <RiMailLine className="h-4 w-4" /> },
+  { id: "tasks", label: "Tareas pendientes", icon: <RiTaskLine className="h-4 w-4" /> },
+  { id: "calendar", label: "Eventos de hoy", icon: <RiCalendarLine className="h-4 w-4" /> },
+  { id: "storage", label: "Almacenamiento", icon: <RiCloudLine className="h-4 w-4" /> },
+  { id: "recentFiles", label: "Archivos recientes", icon: <RiFileLine className="h-4 w-4" /> },
 ];
 
 const notificationSettings = [
-  { id: "push", label: "Notificaciones push", description: "Alertas en el navegador", enabled: true },
-  { id: "tasks", label: "Tareas", description: "Recordatorios de fechas límite", enabled: true },
-  { id: "calendar", label: "Calendario", description: "Próximos eventos", enabled: false },
+  { id: "push", label: "Notificaciones push", description: "Alertas en el navegador" },
+  { id: "tasks", label: "Tareas", description: "Recordatorios de fechas límite" },
+  { id: "calendar", label: "Calendario", description: "Próximos eventos" },
 ];
 
 const integrations = [
@@ -44,14 +29,70 @@ const integrations = [
   { name: "Calendar", connected: true, description: "Eventos y reuniones" },
 ];
 
-const SettingsPage = () => {
+export default function SettingsPage() {
   const [language, setLanguage] = useState("es");
-  const [widgets, setWidgets] = useState(
-    dashboardWidgets.reduce((acc, w) => ({ ...acc, [w.id]: w.enabled }), {} as Record<string, boolean>)
-  );
-  const [notifications, setNotifications] = useState(
-    notificationSettings.reduce((acc, n) => ({ ...acc, [n.id]: n.enabled }), {} as Record<string, boolean>)
-  );
+  const [widgets, setWidgets] = useState<Record<string, boolean>>({});
+  const [notifications, setNotifications] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const res = await fetch("/api/settings");
+        const data = await res.json();
+        
+        if (data.settings) {
+          setLanguage(data.settings.language || "es");
+          
+          const widgetMap: Record<string, boolean> = {};
+          (data.settings.widgets || []).forEach((w: { id: string; enabled: boolean }) => {
+            widgetMap[w.id] = w.enabled;
+          });
+          setWidgets(widgetMap);
+          
+          const notifMap: Record<string, boolean> = {};
+          (data.settings.notifications || []).forEach((n: { id: string; enabled: boolean }) => {
+            notifMap[n.id] = n.enabled;
+          });
+          setNotifications(notifMap);
+        }
+      } catch (err) {
+        console.error("Error loading settings:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadSettings();
+  }, []);
+
+  const handleSave = () => {
+    startTransition(async () => {
+      setSaving(true);
+      try {
+        const res = await fetch("/api/settings", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            language,
+            widgets: Object.entries(widgets).map(([id, enabled]) => ({ id, enabled })),
+            notifications: Object.entries(notifications).map(([id, enabled]) => ({ id, enabled })),
+          }),
+        });
+        
+        if (res.ok) {
+          setSaved(true);
+          setTimeout(() => setSaved(false), 2000);
+        }
+      } catch (err) {
+        console.error("Error saving settings:", err);
+      } finally {
+        setSaving(false);
+      }
+    });
+  };
 
   const toggleWidget = (id: string) => {
     setWidgets((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -60,6 +101,16 @@ const SettingsPage = () => {
   const toggleNotification = (id: string) => {
     setNotifications((prev) => ({ ...prev, [id]: !prev[id] }));
   };
+
+  if (loading) {
+    return (
+      <section className="rounded-2xl border bg-(--axis-surface) px-6 py-5 shadow-[0_14px_40px_rgba(15,23,42,0.08)]">
+        <div className="flex items-center justify-center py-20">
+          <RiLoader4Line className="h-8 w-8 animate-spin text-(--axis-accent)" />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="rounded-2xl border bg-(--axis-surface) px-6 py-5 mt-10 shadow-[0_14px_40px_rgba(15,23,42,0.08)]">
@@ -213,44 +264,6 @@ const SettingsPage = () => {
 
         <div className="rounded-3xl border border-(--axis-border) bg-(--axis-surface-strong) p-6">
           <div className="flex items-center gap-3 mb-5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/10">
-              <RiEyeLine className="h-5 w-5 text-cyan-500" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-(--axis-text)">Privacidad</h3>
-              <p className="text-xs text-(--axis-muted)">Control de datos</p>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between rounded-xl border border-(--axis-border) bg-(--axis-surface) p-4">
-              <div className="flex items-center gap-3">
-                <RiPushpinLine className="h-5 w-5 text-(--axis-muted)" />
-                <div>
-                  <p className="text-sm font-medium text-(--axis-text)">Fijar ventana</p>
-                  <p className="text-xs text-(--axis-muted)">Mantener en primer plano</p>
-                </div>
-              </div>
-              <button className="relative h-6 w-10 rounded-full transition-all bg-(--axis-surface-strong) cursor-pointer">
-                <span className="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-lg transition-all left-0.5" />
-              </button>
-            </div>
-            <div className="flex items-center justify-between rounded-xl border border-(--axis-border) bg-(--axis-surface) p-4">
-              <div className="flex items-center gap-3">
-                <RiLockLine className="h-5 w-5 text-(--axis-muted)" />
-                <div>
-                  <p className="text-sm font-medium text-(--axis-text)">Pantalla de bloqueo</p>
-                  <p className="text-xs text-(--axis-muted)">Bloquear al minimizar</p>
-                </div>
-              </div>
-              <button className="relative h-6 w-10 rounded-full transition-all bg-(--axis-surface-strong) cursor-pointer">
-                <span className="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-lg transition-all left-0.5" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-(--axis-border) bg-(--axis-surface-strong) p-6">
-          <div className="flex items-center gap-3 mb-5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-500/10">
               <RiInformationLine className="h-5 w-5 text-rose-500" />
             </div>
@@ -280,16 +293,43 @@ const SettingsPage = () => {
       </div>
 
       <div className="mt-8 flex items-center justify-end gap-3">
-        <button className="rounded-xl border border-(--axis-border) bg-(--axis-surface-strong) px-5 py-2.5 text-sm font-medium text-(--axis-muted) hover:bg-(--axis-surface) transition cursor-pointer">
+        <button 
+          disabled={saving}
+          className="rounded-xl border border-(--axis-border) bg-(--axis-surface-strong) px-5 py-2.5 text-sm font-medium text-(--axis-muted) hover:bg-(--axis-surface) transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           Cancelar
         </button>
-        <button className="rounded-xl bg-(--axis-accent) px-5 py-2.5 text-sm font-medium text-white hover:opacity-90 transition cursor-pointer flex items-center gap-2">
-          <RiCheckLine className="h-4 w-4" />
-          Guardar cambios
+        <button 
+          onClick={handleSave}
+          disabled={saving || saved}
+          className={cn(
+            "rounded-xl px-5 py-2.5 text-sm font-medium text-white transition cursor-pointer flex items-center gap-2",
+            saving 
+              ? "bg-(--axis-accent)/70 cursor-wait" 
+              : saved 
+                ? "bg-emerald-500 hover:bg-emerald-600"
+                : "bg-(--axis-accent) hover:opacity-90",
+            (saving || saved) && "disabled:opacity-70 disabled:cursor-not-allowed"
+          )}
+        >
+          {saving ? (
+            <>
+              <RiLoader4Line className="h-4 w-4 animate-spin" />
+              Guardando...
+            </>
+          ) : saved ? (
+            <>
+              <RiCheckLine className="h-4 w-4" />
+              Guardado
+            </>
+          ) : (
+            <>
+              <RiCheckLine className="h-4 w-4" />
+              Guardar cambios
+            </>
+          )}
         </button>
       </div>
     </section>
   );
-};
-
-export default SettingsPage;
+}
