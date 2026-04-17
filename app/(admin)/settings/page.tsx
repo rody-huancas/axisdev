@@ -2,35 +2,38 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
+import { Language } from "@/lib/i18n/translations";
 import {  RiGlobeLine,  RiLayoutGridLine,  RiCheckLine,  RiMailLine,  RiFileLine,  RiCloudLine,  RiCalendarLine,  RiTaskLine, RiNotification3Line, RiInformationLine, RiGoogleFill, RiLoader4Line } from "react-icons/ri";
 
-const languages = [
-  { code: "es", name: "Español", flag: "🇪🇸" },
-  { code: "en", name: "English", flag: "🇺🇸" },
-];
-
 const dashboardWidgets = [
-  { id: "gmail", label: "Correos recientes", icon: <RiMailLine className="h-4 w-4" /> },
-  { id: "tasks", label: "Tareas pendientes", icon: <RiTaskLine className="h-4 w-4" /> },
-  { id: "calendar", label: "Eventos de hoy", icon: <RiCalendarLine className="h-4 w-4" /> },
-  { id: "storage", label: "Almacenamiento", icon: <RiCloudLine className="h-4 w-4" /> },
-  { id: "recentFiles", label: "Archivos recientes", icon: <RiFileLine className="h-4 w-4" /> },
+  { id: "gmail", key: "gmail", icon: <RiMailLine className="h-4 w-4" /> },
+  { id: "tasks", key: "tasks", icon: <RiTaskLine className="h-4 w-4" /> },
+  { id: "calendar", key: "calendar", icon: <RiCalendarLine className="h-4 w-4" /> },
+  { id: "storage", key: "storage", icon: <RiCloudLine className="h-4 w-4" /> },
+  { id: "recentFiles", key: "recentFiles", icon: <RiFileLine className="h-4 w-4" /> },
 ];
 
 const notificationSettings = [
-  { id: "push", label: "Notificaciones push", description: "Alertas en el navegador" },
-  { id: "tasks", label: "Tareas", description: "Recordatorios de fechas límite" },
-  { id: "calendar", label: "Calendario", description: "Próximos eventos" },
+  { id: "push", key: "push" },
+  { id: "tasks", key: "tasks" },
+  { id: "calendar", key: "calendar" },
 ];
 
 const integrations = [
-  { name: "Gmail", connected: true, description: "Correos electrónicos" },
-  { name: "Drive", connected: true, description: "Archivos en la nube" },
-  { name: "Calendar", connected: true, description: "Eventos y reuniones" },
+  { name: "Gmail", key: "gmail", descriptionKey: "gmailDesc" },
+  { name: "Drive", key: "drive", descriptionKey: "driveDesc" },
+  { name: "Calendar", key: "calendar", descriptionKey: "calendarDesc" },
+];
+
+const languages = [
+  { code: "es" as Language, name: "Español", flag: "🇪🇸" },
+  { code: "en" as Language, name: "English", flag: "🇺🇸" },
 ];
 
 export default function SettingsPage() {
-  const [language, setLanguage] = useState("es");
+  const { t } = useTranslation();
+  const [language, setLanguage] = useState<Language>("es");
   const [widgets, setWidgets] = useState<Record<string, boolean>>({});
   const [notifications, setNotifications] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
@@ -45,7 +48,9 @@ export default function SettingsPage() {
         const data = await res.json();
         
         if (data.settings) {
-          setLanguage(data.settings.language || "es");
+          const lang = (data.settings.language === "en" ? "en" : "es") as Language;
+          setLanguage(lang);
+          localStorage.setItem("language", lang);
           
           const widgetMap: Record<string, boolean> = {};
           (data.settings.widgets || []).forEach((w: { id: string; enabled: boolean }) => {
@@ -83,6 +88,8 @@ export default function SettingsPage() {
         });
         
         if (res.ok) {
+          localStorage.setItem("language", language);
+          window.dispatchEvent(new CustomEvent("language-changed", { detail: language }));
           setSaved(true);
           setTimeout(() => setSaved(false), 2000);
         }
@@ -116,8 +123,8 @@ export default function SettingsPage() {
     <section className="rounded-2xl border bg-(--axis-surface) px-6 py-5 mt-10 shadow-[0_14px_40px_rgba(15,23,42,0.08)]">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-(--axis-text)">Configuración</h1>
-          <p className="mt-1 text-sm text-(--axis-muted)">Personaliza tu experiencia</p>
+          <h1 className="text-2xl font-semibold text-(--axis-text)">{t.settings.title}</h1>
+          <p className="mt-1 text-sm text-(--axis-muted)">{t.settings.subtitle}</p>
         </div>
       </div>
 
@@ -128,8 +135,8 @@ export default function SettingsPage() {
               <RiGlobeLine className="h-5 w-5 text-violet-500" />
             </div>
             <div>
-              <h3 className="font-semibold text-(--axis-text)">Idioma</h3>
-              <p className="text-xs text-(--axis-muted)">Idioma de la interfaz</p>
+              <h3 className="font-semibold text-(--axis-text)">{t.settings.language.title}</h3>
+              <p className="text-xs text-(--axis-muted)">{t.settings.language.description}</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -158,8 +165,8 @@ export default function SettingsPage() {
               <RiLayoutGridLine className="h-5 w-5 text-indigo-500" />
             </div>
             <div>
-              <h3 className="font-semibold text-(--axis-text)">Widgets</h3>
-              <p className="text-xs text-(--axis-muted)">Qué mostrar en el dashboard</p>
+              <h3 className="font-semibold text-(--axis-text)">{t.settings.widgets.title}</h3>
+              <p className="text-xs text-(--axis-muted)">{t.settings.widgets.description}</p>
             </div>
           </div>
           <div className="space-y-2">
@@ -172,7 +179,7 @@ export default function SettingsPage() {
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-(--axis-surface-strong) text-(--axis-muted)">
                     {widget.icon}
                   </div>
-                  <span className="text-sm font-medium text-(--axis-text)">{widget.label}</span>
+                  <span className="text-sm font-medium text-(--axis-text)">{t.widgets[widget.key as keyof typeof t.widgets]}</span>
                 </div>
                 <button
                   onClick={() => toggleWidget(widget.id)}
@@ -197,8 +204,8 @@ export default function SettingsPage() {
               <RiNotification3Line className="h-5 w-5 text-amber-500" />
             </div>
             <div>
-              <h3 className="font-semibold text-(--axis-text)">Notificaciones</h3>
-              <p className="text-xs text-(--axis-muted)">Cómo recibir alertas</p>
+              <h3 className="font-semibold text-(--axis-text)">{t.settings.notifications.title}</h3>
+              <p className="text-xs text-(--axis-muted)">{t.settings.notifications.description}</p>
             </div>
           </div>
           <div className="space-y-2">
@@ -208,8 +215,8 @@ export default function SettingsPage() {
                 className="flex items-center justify-between rounded-xl border border-(--axis-border) bg-(--axis-surface) p-3"
               >
                 <div>
-                  <p className="text-sm font-medium text-(--axis-text)">{notif.label}</p>
-                  <p className="text-xs text-(--axis-muted)">{notif.description}</p>
+                  <p className="text-sm font-medium text-(--axis-text)">{t.notifications[notif.key as keyof typeof t.notifications].label}</p>
+                  <p className="text-xs text-(--axis-muted)">{t.notifications[notif.key as keyof typeof t.notifications].description}</p>
                 </div>
                 <button
                   onClick={() => toggleNotification(notif.id)}
@@ -234,14 +241,14 @@ export default function SettingsPage() {
               <RiGoogleFill className="h-5 w-5 text-blue-500" />
             </div>
             <div>
-              <h3 className="font-semibold text-(--axis-text)">Integraciones</h3>
-              <p className="text-xs text-(--axis-muted)">Cuentas conectadas</p>
+              <h3 className="font-semibold text-(--axis-text)">{t.settings.integrations.title}</h3>
+              <p className="text-xs text-(--axis-muted)">{t.settings.integrations.description}</p>
             </div>
           </div>
           <div className="space-y-2">
             {integrations.map((item) => (
               <div
-                key={item.name}
+                key={item.key}
                 className="flex items-center justify-between rounded-xl border border-(--axis-border) bg-(--axis-surface) p-3"
               >
                 <div className="flex items-center gap-3">
@@ -249,13 +256,13 @@ export default function SettingsPage() {
                     <RiGoogleFill className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-(--axis-text)">{item.name}</p>
-                    <p className="text-xs text-(--axis-muted)">{item.description}</p>
+                    <p className="text-sm font-medium text-(--axis-text)">{t.integrations[item.key as keyof typeof t.integrations]}</p>
+                    <p className="text-xs text-(--axis-muted)">{t.integrations[item.descriptionKey as keyof typeof t.integrations]}</p>
                   </div>
                 </div>
                 <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-1 text-[10px] font-medium text-green-400">
                   <RiCheckLine className="h-3 w-3" />
-                  OK
+                  {t.integrations.connected}
                 </span>
               </div>
             ))}
@@ -268,23 +275,23 @@ export default function SettingsPage() {
               <RiInformationLine className="h-5 w-5 text-rose-500" />
             </div>
             <div>
-              <h3 className="font-semibold text-(--axis-text)">Acerca de</h3>
-              <p className="text-xs text-(--axis-muted)">Información de la app</p>
+              <h3 className="font-semibold text-(--axis-text)">{t.settings.about.title}</h3>
+              <p className="text-xs text-(--axis-muted)">{t.settings.about.description}</p>
             </div>
           </div>
           <div className="space-y-3">
             <div className="rounded-xl border border-(--axis-border) bg-(--axis-surface) p-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-(--axis-muted)">Versión</span>
+                <span className="text-sm text-(--axis-muted)">{t.about.version}</span>
                 <span className="text-sm font-medium text-(--axis-text)">1.0.0</span>
               </div>
             </div>
             <div className="rounded-xl border border-(--axis-border) bg-(--axis-surface) p-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-(--axis-muted)">Estado</span>
+                <span className="text-sm text-(--axis-muted)">{t.about.status}</span>
                 <span className="flex items-center gap-1 text-sm font-medium text-green-400">
                   <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
-                  Activo
+                  {t.about.active}
                 </span>
               </div>
             </div>
@@ -297,7 +304,7 @@ export default function SettingsPage() {
           disabled={saving}
           className="rounded-xl border border-(--axis-border) bg-(--axis-surface-strong) px-5 py-2.5 text-sm font-medium text-(--axis-muted) hover:bg-(--axis-surface) transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Cancelar
+          {t.common.cancel}
         </button>
         <button 
           onClick={handleSave}
@@ -315,17 +322,17 @@ export default function SettingsPage() {
           {saving ? (
             <>
               <RiLoader4Line className="h-4 w-4 animate-spin" />
-              Guardando...
+              {t.common.saving}
             </>
           ) : saved ? (
             <>
               <RiCheckLine className="h-4 w-4" />
-              Guardado
+              {t.common.saved}
             </>
           ) : (
             <>
               <RiCheckLine className="h-4 w-4" />
-              Guardar cambios
+              {t.common.save}
             </>
           )}
         </button>

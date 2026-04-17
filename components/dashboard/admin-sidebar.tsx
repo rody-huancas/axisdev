@@ -2,39 +2,40 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import { signOutAction } from "@/actions/auth/sign-out";
 import { BiLogOut } from "react-icons/bi";
 import { RiBookOpenLine, RiDashboardLine, RiGroupLine, RiMessage3Line, RiSettings3Line, RiTaskLine } from "react-icons/ri";
 
 type NavItem = {
-  label: string;
+  key: string;
   href : string;
   icon : React.ReactNode;
 };
 
 const navItems: NavItem[] = [
   {
-    label: "Dashboard",
+    key: "dashboard",
     href : "/dashboard",
     icon : <RiDashboardLine className="h-4 w-4" />,
   },
   {
-    label: "Drive",
+    key: "drive",
     href : "/drive",
     icon : <RiBookOpenLine className="h-4 w-4" />,
   },
   {
-    label: "Calendario",
+    key: "calendar",
     href : "/calendar",
     icon : <RiGroupLine className="h-4 w-4" />,
   },
   {
-    label: "Tareas",
+    key: "tasks",
     href : "/tasks",
     icon : <RiTaskLine className="h-4 w-4" />,
   },
   {
-    label: "Gmail",
+    key: "gmail",
     href : "/gmail",
     icon : <RiMessage3Line className="h-4 w-4" />,
   },
@@ -49,6 +50,7 @@ type AdminSidebarProps = {
 export const AdminSidebar = ({ isMobileOpen, onMobileClose, isDesktopOpen }: AdminSidebarProps) => {
   const pathname    = usePathname();
   const isCollapsed = !isDesktopOpen;
+  const { t } = useTranslation();
   
   return (
     <>
@@ -88,7 +90,7 @@ export const AdminSidebar = ({ isMobileOpen, onMobileClose, isDesktopOpen }: Adm
 
           <nav className="space-y-3 text-sm">
             <p className={cn("text-[10px] uppercase tracking-[0.3em] text-(--axis-muted)", isCollapsed && "lg:hidden")}>
-              Menu
+              {t.common.menu}
             </p>
             <div className="space-y-2">
               {navItems.map((item) => {
@@ -114,7 +116,7 @@ export const AdminSidebar = ({ isMobileOpen, onMobileClose, isDesktopOpen }: Adm
                     >
                       {item.icon}
                     </span>
-                    <span className={cn("font-medium", isCollapsed && "lg:hidden")}>{item.label}</span>
+                    <span className={cn("font-medium", isCollapsed && "lg:hidden")}>{t.sidebar[item.key as keyof typeof t.sidebar]}</span>
                   </Link>
                 );
               })}
@@ -145,7 +147,7 @@ export const AdminSidebar = ({ isMobileOpen, onMobileClose, isDesktopOpen }: Adm
             )}>
               <RiSettings3Line className="h-4 w-4" />
             </span>
-            <span className={cn(isCollapsed && "lg:hidden")}>Configuracion</span>
+            <span className={cn(isCollapsed && "lg:hidden")}>{t.sidebar.settings}</span>
           </Link>
             );
           })()}
@@ -159,7 +161,7 @@ export const AdminSidebar = ({ isMobileOpen, onMobileClose, isDesktopOpen }: Adm
               type="submit"
             >
               <BiLogOut size={18} />
-              <span className={cn(isCollapsed && "lg:hidden")}>Cerrar sesion</span>
+              <span className={cn(isCollapsed && "lg:hidden")}>{t.sidebar.logout}</span>
             </button>
           </form>
         </div>

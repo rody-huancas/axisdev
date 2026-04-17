@@ -2,6 +2,7 @@
 
 import { ProgressProvider } from "@bprogress/next/app";
 import { Toaster } from "sileo";
+import { TranslationProvider } from "@/lib/i18n";
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -12,7 +13,9 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
       shallowRouting
     >
       <Toaster position="top-right" />
-      {children}
+      <TranslationProvider>
+        {children}
+      </TranslationProvider>
     </ProgressProvider>
   );
 };

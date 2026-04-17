@@ -3,19 +3,21 @@
 import { useMemo, useState } from "react";
 import { sileo } from "sileo";
 import type { SlotInfo } from "react-big-calendar";
+import { CalendarView } from "./calendar-view";
+import { useTranslation } from "@/lib/i18n";
 import { CalendarHeader } from "./calendar-layout";
 import { EventDetailModal } from "./event-detail-modal";
 import { CreateEventModal } from "./create-event-modal";
 import { getDefaultCalendarFetchRange } from "@/lib/calendar-date-range";
 import { ApiEvent, toDate, minutesToTime, combineLocalDateTime, formatDateValue } from "@/lib/calendar-utils";
 import type { CalendarEvent } from "./types";
-import { CalendarView } from "./calendar-view";
 
 type CalendarClientProps = {
   initialItems: ApiEvent[];
 };
 
 export const CalendarClient = ({ initialItems }: CalendarClientProps) => {
+  const { t } = useTranslation();
   const [items            , setItems            ] = useState<ApiEvent[]>(initialItems);
   const [isCreateOpen     , setIsCreateOpen     ] = useState<boolean>(false);
   const [isDetailOpen     , setIsDetailOpen     ] = useState<boolean>(false);
@@ -84,7 +86,7 @@ export const CalendarClient = ({ initialItems }: CalendarClientProps) => {
   const handleCreate = async () => {
     const title = createTitle.trim();
     if (!title) {
-      sileo.error({ title: "Titulo requerido", description: "Escribe un titulo para el evento." });
+      sileo.error({ title: t.pages.calendar.titleRequired, description: t.pages.calendar.writeTitle });
       return;
     }
 
@@ -92,11 +94,11 @@ export const CalendarClient = ({ initialItems }: CalendarClientProps) => {
     const endAt   = combineLocalDateTime(createDate, createEndTime);
 
     if (Number.isNaN(startAt.getTime()) || Number.isNaN(endAt.getTime())) {
-      sileo.error({ title: "Fecha invalida", description: "Revisa inicio y fin del evento." });
+      sileo.error({ title: t.pages.calendar.invalidDate, description: t.pages.calendar.checkTimes });
       return;
     }
     if (endAt.getTime() <= startAt.getTime()) {
-      sileo.error({ title: "Horario invalido", description: "La hora de fin debe ser posterior al inicio." });
+      sileo.error({ title: t.pages.calendar.invalidSchedule, description: t.pages.calendar.endAfterStart });
       return;
     }
 
@@ -122,7 +124,7 @@ export const CalendarClient = ({ initialItems }: CalendarClientProps) => {
       setItems((prev) => [data.item, ...prev]);
       setIsCreateOpen(false);
     } catch (err) {
-      sileo.error({ title: "No se pudo crear", description: err instanceof Error ? err.message : undefined });
+      sileo.error({ title: t.pages.calendar.createFailed, description: err instanceof Error ? err.message : undefined });
     } finally {
       setIsLoading(false);
     }

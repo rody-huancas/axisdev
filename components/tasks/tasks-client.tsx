@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { sileo } from "sileo";
 import type { TareaPendiente } from "@/services/google-service";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import { TaskItem } from "./components/task-item";
 import { CreateTaskModal } from "./modals/create-task-modal";
 import { TaskDetailModal } from "./modals/task-detail-modal";
@@ -20,6 +21,7 @@ type TasksClientProps = {
 };
 
 export const TasksClient = ({ initialTasks }: TasksClientProps) => {
+  const { t } = useTranslation();
   const [tasks       , setTasks       ] = useState<TareaPendiente[]>(initialTasks);
   const [query       , setQuery       ] = useState<string>("");
   const [status      , setStatus      ] = useState<"all" | "pendiente" | "completada">("all");
@@ -55,7 +57,7 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
       setTasks(data.items);
       setPage(1);
     } catch {
-      sileo.error({ title: "Error al cargar" });
+      sileo.error({ title: t.pages.tasks.loadError });
     } finally {
       setIsLoading(false);
     }
@@ -76,9 +78,9 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
       if (!res.ok) throw new Error();
       const result = await res.json() as { item: TareaPendiente };
       setTasks((prev) => [result.item, ...prev]);
-      sileo.success({ title: "Tarea creada" });
+      sileo.success({ title: t.pages.tasks.taskCreated });
     } catch {
-      sileo.error({ title: "Error al crear" });
+      sileo.error({ title: t.pages.tasks.createError });
     } finally {
       setIsLoading(false);
     }
@@ -104,9 +106,9 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
       setTasks((prev) => prev.map((t) => (t.id === selected.id ? result.item : t)));
       setSelected(result.item);
       setIsDetailOpen(false);
-      sileo.success({ title: "Actualizada" });
+      sileo.success({ title: t.pages.tasks.taskUpdated });
     } catch {
-      sileo.error({ title: "Error al actualizar" });
+      sileo.error({ title: t.pages.tasks.updateError });
     } finally {
       setIsLoading(false);
     }
@@ -128,9 +130,9 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
         return res.json();
       }),
       {
-        loading: { title: completed ? "Completando..." : "Reabriendo..." },
-        success: { title: completed ? "Completada" : "Abierta" },
-        error  : { title: "Error al actualizar" },
+        loading: { title: completed ? t.pages.tasks.completing : t.pages.tasks.reopening },
+        success: { title: completed ? t.pages.tasks.taskCompleted : t.pages.tasks.taskOpen },
+        error  : { title: t.pages.tasks.updateError },
       },
     );
   };
@@ -148,9 +150,9 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
       setTasks((prev) => prev.filter((t) => t.id !== selected.id));
       setIsDetailOpen(false);
       setSelected(null);
-      sileo.success({ title: "Eliminada" });
+      sileo.success({ title: t.pages.tasks.taskDeleted });
     } catch {
-      sileo.error({ title: "Error al eliminar" });
+      sileo.error({ title: t.pages.tasks.deleteError });
     } finally {
       setIsLoading(false);
     }
@@ -168,9 +170,9 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
         setTasks((prev) => prev.filter((t) => t.id !== task.id));
       })(),
       {
-        loading: { title: "Eliminando..." },
-        success: { title: "Eliminada" },
-        error: { title: "Error al eliminar" },
+        loading: { title: t.pages.tasks.deleting },
+        success: { title: t.pages.tasks.taskDeleted },
+        error: { title: t.pages.tasks.deleteError },
       },
     );
   };
@@ -196,7 +198,7 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
               setQuery(e.target.value);
               setPage(1);
             }}
-            placeholder="Buscar tareas..."
+            placeholder={t.pages.tasks.searchTasks}
             className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) py-3 pl-11 pr-4 text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:border-(--axis-accent) focus:outline-none"
           />
         </div>
@@ -206,7 +208,7 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
             onClick={refresh}
             disabled={isLoading}
             className="flex h-11 w-11 items-center justify-center rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) text-(--axis-muted) transition hover:bg-(--axis-surface) hover:text-(--axis-accent) disabled:opacity-50"
-            title="Actualizar"
+            title={t.pages.tasks.reload}
           >
             <RiRefreshLine className={cn("h-5 w-5", isLoading && "animate-spin")} />
           </button>
@@ -216,7 +218,7 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
             className="flex items-center gap-2 rounded-2xl bg-(--axis-accent) px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:opacity-90"
           >
             <RiAddLine className="h-5 w-5" />
-            Nueva
+            {t.pages.tasks.new}
           </button>
         </div>
       </div>
@@ -237,7 +239,7 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
                 : "text-(--axis-muted) hover:text-(--axis-text)",
             )}
           >
-            {value === "all" ? "Todas" : value === "pendiente" ? "Pendientes" : "Completadas"}
+            {value === "all" ? t.pages.tasks.all : value === "pendiente" ? t.pages.tasks.pendingTab : t.pages.tasks.completedTab}
           </button>
         ))}
       </div>
@@ -246,8 +248,8 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
         {mainTasks.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-(--axis-border) bg-(--axis-surface-strong) px-6 py-16 text-center">
             <RiAddLine className="h-12 w-12 text-(--axis-muted)" />
-            <p className="mt-4 text-base font-semibold text-(--axis-text)">No hay tareas</p>
-            <p className="text-sm text-(--axis-muted)">Crea una nueva tarea para comenzar</p>
+            <p className="mt-4 text-base font-semibold text-(--axis-text)">{t.pages.tasks.noTasks}</p>
+            <p className="text-sm text-(--axis-muted)">{t.pages.tasks.createTaskStart}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -273,7 +275,7 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
             className="flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-sm font-semibold uppercase tracking-[0.15em] text-(--axis-text) transition hover:bg-(--axis-surface) disabled:opacity-50"
           >
             <RiArrowLeftLine className="h-4 w-4" />
-            Anterior
+            {t.pages.tasks.previous}
           </button>
           <span className="text-sm text-(--axis-muted)">
             {page} / {totalPages}
@@ -284,7 +286,7 @@ export const TasksClient = ({ initialTasks }: TasksClientProps) => {
             disabled={page === totalPages || isLoading}
             className="flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-sm font-semibold uppercase tracking-[0.15em] text-(--axis-text) transition hover:bg-(--axis-surface) disabled:opacity-50"
           >
-            Siguiente
+            {t.pages.tasks.next}
             <RiArrowRightLine className="h-4 w-4" />
           </button>
         </div>
