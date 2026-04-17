@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { sileo } from "sileo";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import type { DriveFile } from "@/services/google-service";
 import { uploadDriveFile } from "@/actions/google/upload-drive-file";
 import { FilePreviewModal } from "@/components/drive/file-preview-modal";
@@ -106,6 +107,7 @@ const bgToneForFile = (mimeType: string, name: string) => {
 
 export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGridProps) => {
   const router = useRouter();
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [query             , setQuery             ] = useState<string>("");
@@ -221,7 +223,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
 
   const handleDownloadItems = async (ids: string[]) => {
     if (!ids.length) {
-      sileo.warning({ title: "Selecciona archivos", description: "Elige archivos o carpetas para descargar." });
+      sileo.warning({ title: t.pages.drive.selectFiles, description: t.pages.drive.chooseFiles });
       return;
     }
 
@@ -252,10 +254,10 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
     });
 
     sileo.promise(promise, {
-      loading: { title: "Preparando descarga..." },
-      success: { title: "Descarga lista" },
+      loading: { title: t.pages.drive.preparingDownload },
+      success: { title: t.pages.drive.downloadReady },
       error: (err) => ({
-        title: "No se pudo descargar",
+        title: t.pages.drive.downloadFailed,
         description: err instanceof Error ? err.message : undefined,
       }),
     });
@@ -271,7 +273,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
     const trimmed = folderName.trim();
 
     if (!trimmed) {
-      sileo.error({ title: "Nombre requerido", description: "Escribe un nombre para la carpeta." });
+      sileo.error({ title: t.pages.drive.nameRequired, description: t.pages.drive.writeFolderName });
       return;
     }
 
@@ -279,9 +281,9 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
     const promise = createDriveFolder({ name: trimmed, parentId: currentFolderId });
 
     sileo.promise(promise, {
-      loading: { title: "Creando carpeta..." },
-      success: { title: "Carpeta creada" },
-      error: { title: "No se pudo crear la carpeta" },
+      loading: { title: t.pages.drive.creatingFolder },
+      success: { title: t.pages.drive.folderCreated },
+      error: { title: t.pages.drive.folderFailed },
     });
 
     try {
@@ -296,7 +298,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
 
   const handleUploadSubmit = async () => {
     if (!uploadFiles.length) {
-      sileo.warning({ title: "Selecciona archivos", description: "Agrega uno o mas archivos para subir." });
+      sileo.warning({ title: t.pages.drive.selectFiles, description: t.pages.drive.addFiles });
       return;
     }
 
@@ -306,9 +308,9 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
     );
 
     sileo.promise(promise, {
-      loading: { title: "Subiendo archivos..." },
-      success: { title: "Archivos subidos" },
-      error: { title: "No se pudo subir el archivo" },
+      loading: { title: t.pages.drive.uploadingFiles },
+      success: { title: t.pages.drive.filesUploaded },
+      error: { title: t.pages.drive.uploadFailed },
     });
 
     try {
@@ -337,15 +339,15 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                 : "cursor-default border-(--axis-border) bg-(--axis-surface) text-(--axis-muted)",
             )}
             aria-current={!inFolder ? "page" : undefined}
-            title={inFolder ? "Volver a Mi Drive" : "Mi Drive"}
+            title={inFolder ? t.pages.drive.backToMyDrive : t.pages.drive.myDrive}
           >
-            Mi Drive
+            {t.pages.drive.myDrive}
           </button>
           {inFolder && (
             <>
               <RiArrowRightSLine className="h-4 w-4 text-(--axis-muted)" aria-hidden />
               <span className="max-w-[60ch] truncate font-medium text-(--axis-text)" aria-current="page">
-                {currentFolderName ?? "Carpeta"}
+                {currentFolderName ?? t.pages.drive.folder}
               </span>
             </>
           )}
@@ -360,7 +362,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Buscar por nombre..."
+              placeholder={t.pages.drive.searchByName}
               className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) py-3 pl-11 pr-4 text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:border-[color-mix(in_srgb,var(--axis-accent)_45%,var(--axis-border))] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--axis-accent)_22%,transparent)]"
             />
           </div>
@@ -383,7 +385,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
               )}
             >
               <RiDownloadLine className="h-4 w-4 opacity-80" aria-hidden />
-              {isBulkDownloadMode ? "Salir" : "Varios"}
+              {isBulkDownloadMode ? t.pages.drive.exit : t.pages.drive.various}
             </button>
             <button
               type="button"
@@ -391,7 +393,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
               className="inline-flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-text) transition hover:bg-(--axis-surface)"
             >
               <RiFolderAddLine className="h-4 w-4 text-(--axis-accent-2)" aria-hidden />
-              Carpeta
+              {t.pages.drive.folder}
             </button>
             <button
               type="button"
@@ -399,7 +401,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
               className="inline-flex items-center gap-2 rounded-2xl bg-(--axis-accent) px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-[0_8px_24px_rgba(108,99,255,0.35)] transition hover:opacity-90"
             >
               <RiUploadCloud2Line className="h-4 w-4" aria-hidden />
-              Subir
+              {t.pages.drive.upload}
             </button>
             <div className="flex items-center gap-1 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) p-1">
               <button
@@ -411,7 +413,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                     ? "bg-(--axis-surface) text-(--axis-accent) shadow-sm"
                     : "text-(--axis-muted) hover:text-(--axis-text)",
                 )}
-                aria-label="Vista de cuadricula"
+                aria-label={t.pages.drive.gridView}
               >
                 <RiLayoutGridLine className="h-4 w-4" />
               </button>
@@ -424,7 +426,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                     ? "bg-(--axis-surface) text-(--axis-accent) shadow-sm"
                     : "text-(--axis-muted) hover:text-(--axis-text)",
                 )}
-                aria-label="Vista de lista"
+                aria-label={t.pages.drive.listView}
               >
                 <RiListUnordered className="h-4 w-4" />
               </button>
@@ -436,7 +438,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
       {isBulkDownloadMode && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted)">
-            Seleccion multiple
+            {t.pages.drive.multiSelect}
             {selectedIds.length > 0 ? (
               <span className="ml-2 text-(--axis-text)">({selectedIds.length})</span>
             ) : null}
@@ -449,14 +451,14 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
               className="inline-flex items-center gap-2 rounded-2xl bg-(--axis-accent) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white transition hover:opacity-90 disabled:opacity-50"
             >
               <RiDownloadLine className="h-4 w-4" aria-hidden />
-              Descargar
+              {t.pages.drive.download}
             </button>
             <button
               type="button"
               onClick={exitBulkMode}
               className="rounded-2xl border border-(--axis-border) bg-(--axis-surface) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong)"
             >
-              Cancelar
+              {t.common.cancel}
             </button>
           </div>
         </div>
@@ -476,14 +478,14 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
             <div className="w-full max-w-md rounded-3xl border border-(--axis-border) bg-(--axis-surface) p-6 shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
             <div className="space-y-2">
               <p className="text-xs uppercase tracking-[0.3em] text-(--axis-muted)">Drive</p>
-              <h3 className="text-xl font-semibold text-(--axis-text)">Crear carpeta</h3>
-              <p className="text-sm text-(--axis-muted)">Define el nombre de la carpeta nueva.</p>
+              <h3 className="text-xl font-semibold text-(--axis-text)">{t.pages.drive.createFolder}</h3>
+              <p className="text-sm text-(--axis-muted)">{t.pages.drive.folderNameDesc}</p>
             </div>
             <div className="mt-6 space-y-4">
               <input
                 value={folderName}
                 onChange={(event) => setFolderName(event.target.value)}
-                placeholder="Nombre de la carpeta"
+                placeholder={t.pages.drive.folderNamePlaceholder}
                 className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3 text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:outline-none"
                 disabled={isCreating}
               />
@@ -497,7 +499,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                   disabled={isCreating}
                   className="rounded-2xl border border-(--axis-border) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong) disabled:opacity-50"
                 >
-                  Cancelar
+                  {t.common.cancel}
                 </button>
                 <button
                   type="button"
@@ -508,7 +510,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                   {isCreating && (
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                   )}
-                  {isCreating ? "Creando" : "Crear"}
+                  {isCreating ? t.pages.drive.creating : t.pages.drive.create}
                 </button>
               </div>
             </div>
@@ -531,8 +533,8 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
             <div className="w-full max-w-2xl rounded-3xl border border-(--axis-border) bg-(--axis-surface) p-6 shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
             <div className="space-y-2">
               <p className="text-xs uppercase tracking-[0.3em] text-(--axis-muted)">Drive</p>
-              <h3 className="text-xl font-semibold text-(--axis-text)">Subir archivos</h3>
-              <p className="text-sm text-(--axis-muted)">Arrastra y suelta o selecciona varios archivos.</p>
+              <h3 className="text-xl font-semibold text-(--axis-text)">{t.pages.drive.uploadFiles}</h3>
+              <p className="text-sm text-(--axis-muted)">{t.pages.drive.uploadFilesDesc}</p>
             </div>
             <div className="mt-6 space-y-4">
               <div
@@ -549,15 +551,15 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={handleDrop}
               >
-                <p className="text-sm font-semibold text-(--axis-text)">Suelta tus archivos aquí</p>
-                <p className="text-xs text-(--axis-muted)">o</p>
+                <p className="text-sm font-semibold text-(--axis-text)">{t.pages.drive.dropHere}</p>
+                <p className="text-xs text-(--axis-muted)">{t.pages.drive.or}</p>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
                   className="rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-text) transition hover:bg-(--axis-surface) disabled:opacity-50"
                 >
-                  Seleccionar archivos
+                  {t.pages.drive.selectFilesBtn}
                 </button>
                 <input
                   ref={fileInputRef}
@@ -581,7 +583,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                           disabled={isUploading}
                           className="rounded-xl py-1 px-2 text-white bg-red-500 transition hover:bg-red-600 disabled:opacity-50 cursor-pointer"
                         >
-                          Quitar
+                          {t.pages.drive.remove}
                         </button>
                       </div>
                     </div>
@@ -596,7 +598,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                   disabled={isUploading || uploadFiles.length === 0}
                   className="rounded-2xl border border-(--axis-border) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong) disabled:opacity-50"
                 >
-                  Limpiar
+                  {t.pages.drive.clear}
                 </button>
                 <div className="flex items-center gap-3">
                   <button
@@ -608,7 +610,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                     disabled={isUploading}
                     className="rounded-2xl border border-(--axis-border) px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong) disabled:opacity-50"
                   >
-                    Cancelar
+                    {t.common.cancel}
                   </button>
                   <button
                     type="button"
@@ -619,7 +621,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                     {isUploading && (
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                     )}
-                    {isUploading ? "Subiendo" : "Subir"}
+                    {isUploading ? t.pages.drive.uploading : t.pages.drive.upload}
                   </button>
                 </div>
               </div>
@@ -643,10 +645,10 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
             )}
           >
             {value === "all"
-              ? "Todo"
+              ? t.pages.drive.all
               : value === "folders"
-                ? `Carpetas (${folders.length})`
-                : `Archivos (${documents.length})`}
+                ? `${t.pages.drive.folders} (${folders.length})`
+                : `${t.pages.drive.filesCount} (${documents.length})`}
           </button>
         ))}
       </div>
@@ -711,7 +713,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                             badgeTone,
                           )}
                         >
-                          {isFolderItem ? "carpeta" : extension ? extension : "archivo"}
+                          {isFolderItem ? t.pages.drive.folderItem : extension ? extension : t.pages.drive.file}
                         </span>
                         <p className="text-xs text-(--axis-muted)">{file.actualizado || "-"}</p>
                       </div>
@@ -733,8 +735,8 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                           "flex h-9 w-9 items-center justify-center rounded-xl border border-(--axis-border) bg-(--axis-surface) text-(--axis-muted) shadow-sm transition hover:border-[color-mix(in_srgb,var(--axis-accent)_35%,var(--axis-border))] hover:text-(--axis-accent)",
                           view === "grid" && "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
                         )}
-                        title="Descargar"
-                        aria-label="Descargar"
+                        title={t.pages.drive.download}
+                        aria-label={t.pages.drive.download}
                       >
                         <RiDownloadLine className="h-4 w-4" aria-hidden />
                       </button>
@@ -748,7 +750,7 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
                         onPointerDown={(event) => event.stopPropagation()}
                         onClick={(event) => event.stopPropagation()}
                         className="h-5 w-5 rounded border-(--axis-border) bg-(--axis-surface) accent-(--axis-accent)"
-                        aria-label={isSelected ? "Deseleccionar" : "Seleccionar"}
+                        aria-label={isSelected ? t.pages.drive.deselect : t.pages.drive.select}
                       />
                     )}
                   </div>
@@ -761,11 +763,11 @@ export const FileGrid = ({ files, currentFolderId, currentFolderName }: FileGrid
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-(--axis-surface-strong) ring-1 ring-(--axis-border)">
               <RiInboxLine className="h-7 w-7 text-(--axis-muted)" aria-hidden />
             </div>
-            <p className="mt-4 text-sm font-semibold text-(--axis-text)">No hay elementos</p>
+            <p className="mt-4 text-sm font-semibold text-(--axis-text)">{t.pages.drive.noElements}</p>
             <p className="mt-1 max-w-sm text-sm text-(--axis-muted)">
               {query
-                ? "Prueba otro término de búsqueda o cambia el filtro."
-                : "Sube archivos o crea una carpeta para empezar."}
+                ? t.pages.drive.tryAnother
+                : t.pages.drive.uploadToStart}
             </p>
           </div>
         )}
