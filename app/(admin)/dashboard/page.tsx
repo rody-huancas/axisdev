@@ -1,18 +1,20 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import type { TareaPendiente } from "@/lib/types/google-service";
 import { auth } from "@/auth";
+import { StatsCards } from "@/components/dashboard/stats-cards";
+import { TaskSection } from "@/components/dashboard/task-section";
+import { DriveSection } from "@/components/dashboard/drive-section";
+import { StorageCards } from "@/components/dashboard/storage-cards";
+import { DashboardHero } from "@/components/dashboard/dashboard-hero";
+import { UrgentSection } from "@/components/dashboard/urgent-section";
+import { MyTasksSection } from "@/components/dashboard/my-tasks-section";
 import { LearningCharts } from "@/components/dashboard/learning-charts";
-import { TaskStatusChart } from "@/components/dashboard/task-status-chart";
-import { DriveBreakdownChart } from "@/components/dashboard/drive-breakdown-chart";
+import { GreetingSection } from "@/components/dashboard/greeting-section";
+import { RecentFilesSection } from "@/components/dashboard/recent-files-section";
+import { RecentEmailsSection } from "@/components/dashboard/recent-emails";
 import { getOrCreateUserSettings } from "@/lib/settings";
 import { computeStorageBreakdown, computeWeeklyBars, computeTaskStats } from "@/lib/utils/dashboard-storage";
 import { fetchCalendarEvents, fetchGmailPreview, fetchGmailUnreadCount, fetchRecentFiles, fetchStorageInfo, fetchTasksPreview } from "@/services";
-import { RiMailLine, RiCalendarLine, RiTaskLine, RiDriveLine, RiExternalLinkLine, RiCheckLine, RiTimeLine } from "react-icons/ri";
-
-const encodeGmailId = (id: string) => {
-  return id.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-};
 
 const getTodayEvents = (events: { inicioIso: string }[]) => {
   const today = new Date().toISOString().split("T")[0];
@@ -39,7 +41,15 @@ const DashboardPage = async () => {
   const userName = session?.user?.name?.split(" ")[0] ?? "Sofia";
   const userEmail = session?.user?.email ?? null;
 
-  const [filesResult, eventsResult, storageResult, tasksResult, gmailResult, gmailUnreadResult, settings] = await Promise.all([
+  const [
+    filesResult,
+    eventsResult,
+    storageResult,
+    tasksResult,
+    gmailResult,
+    gmailUnreadResult,
+    settings,
+  ] = await Promise.all([
     fetchRecentFiles(),
     fetchCalendarEvents(),
     fetchStorageInfo(),
@@ -49,17 +59,21 @@ const DashboardPage = async () => {
     getOrCreateUserSettings(userEmail!),
   ]);
 
-  const enabledWidgets = settings.widgets?.reduce((acc, w) => {
-    acc[w.id] = w.enabled;
-    return acc;
-  }, {} as Record<string, boolean>) ?? {};
+  const enabledWidgets =
+    settings.widgets?.reduce(
+      (acc, w) => {
+        acc[w.id] = w.enabled;
+        return acc;
+      },
+      {} as Record<string, boolean>,
+    ) ?? {};
 
-  const driveFiles = filesResult.ok ? filesResult.data : [];
-  const calendarEvents = eventsResult.ok ? eventsResult.data : [];
-  const tasks = tasksResult.ok ? tasksResult.data : [];
-  const gmailMessages = gmailResult.ok ? gmailResult.data : [];
+  const driveFiles       = filesResult.ok  ? filesResult.data : [];
+  const calendarEvents   = eventsResult.ok ? eventsResult.data : [];
+  const tasks            = tasksResult.ok  ? tasksResult.data : [];
+  const gmailMessages    = gmailResult.ok  ? gmailResult.data : [];
   const gmailUnreadCount = gmailUnreadResult.ok ? gmailUnreadResult.data : 0;
-  const storageInfo = storageResult.ok ? storageResult.data : { usadoGb: 0, limiteGb: 0, porcentaje: 0 };
+  const storageInfo      = storageResult.ok ? storageResult.data : { usadoGb: 0, limiteGb: 0, porcentaje: 0 };
 
   const storageBreakdown = computeStorageBreakdown(driveFiles);
   const weeklyBars = computeWeeklyBars(calendarEvents);
@@ -77,217 +91,50 @@ const DashboardPage = async () => {
     <section className="space-y-6">
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-6 min-w-0">
-          <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#6C63FF] via-[#5A7BFF] to-[#4DA2FF] p-6 text-white shadow-[0_18px_36px_rgba(108,99,255,0.28)] sm:p-8">
-            <div className="absolute -right-10 top-6 h-32 w-32 rounded-full bg-white/20 blur-2xl" />
-            <div className="absolute right-16 top-16 h-20 w-20 rounded-3xl border border-white/20" />
-            <div className="absolute bottom-0 left-0 h-28 w-28 -translate-x-8 translate-y-8 rounded-full bg-white/10" />
-            <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-              <div className="max-w-lg space-y-3">
-                <p className="text-xs uppercase tracking-[0.3em] text-white/70">AxisDev</p>
-                <h2 className="text-2xl font-semibold sm:text-3xl">
-                  Tu centro inteligente de Google Workspace
-                </h2>
-                <p className="text-sm text-white/80">
-                  {userName}, consolida Drive, Calendar, Tasks y Gmail en un solo panel.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/drive"
-                  className="rounded-2xl bg-white px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 shadow-lg transition hover:-translate-y-1"
-                >
-                  Ir a Drive
-                </Link>
-              </div>
-            </div>
-          </div>
+          <DashboardHero userName={userName} />
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Link
-              href="/drive"
-              className="group rounded-3xl border bg-(--axis-surface) p-5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 overflow-hidden cursor-pointer"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-(--axis-text)">Documentos</p>
-                  <p className="text-xs text-(--axis-muted)">Archivos</p>
-                </div>
-                <span className="rounded-full bg-(--axis-surface-strong) px-2 py-1 text-[10px] font-semibold text-(--axis-muted)">
-                  {storageBreakdown[0]?.percentage ?? 0}%
-                </span>
-              </div>
-              <div className="mt-4 h-2 rounded-full bg-(--axis-surface-strong)">
-                <div
-                  className="h-2 rounded-full bg-linear-to-r from-indigo-500 to-sky-500"
-                  style={{ width: `${storageBreakdown[0]?.percentage ?? 0}%` }}
-                />
-              </div>
-            </Link>
-            <Link
-              href="/drive"
-              className="group rounded-3xl border bg-(--axis-surface) p-5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 overflow-hidden cursor-pointer"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-(--axis-text)">Media</p>
-                  <p className="text-xs text-(--axis-muted)">Videos, imagenes</p>
-                </div>
-                <span className="rounded-full bg-(--axis-surface-strong) px-2 py-1 text-[10px] font-semibold text-(--axis-muted)">
-                  {storageBreakdown[1]?.percentage ?? 0}%
-                </span>
-              </div>
-              <div className="mt-4 h-2 rounded-full bg-(--axis-surface-strong)">
-                <div
-                  className="h-2 rounded-full bg-linear-to-r from-fuchsia-500 to-violet-500"
-                  style={{ width: `${storageBreakdown[1]?.percentage ?? 0}%` }}
-                />
-              </div>
-            </Link>
-            <Link
-              href="/drive"
-              className="group rounded-3xl border bg-(--axis-surface) p-5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 overflow-hidden cursor-pointer"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-(--axis-text)">Otros</p>
-                  <p className="text-xs text-(--axis-muted)">Otros archivos</p>
-                </div>
-                <span className="rounded-full bg-(--axis-surface-strong) px-2 py-1 text-[10px] font-semibold text-(--axis-muted)">
-                  {storageBreakdown[2]?.percentage ?? 0}%
-                </span>
-              </div>
-              <div className="mt-4 h-2 rounded-full bg-(--axis-surface-strong)">
-                <div
-                  className="h-2 rounded-full bg-linear-to-r from-emerald-500 to-cyan-500"
-                  style={{ width: `${storageBreakdown[2]?.percentage ?? 0}%` }}
-                />
-              </div>
-            </Link>
-          </div>
+          <StorageCards />
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {enabledWidgets.gmail && (
-            <Link
-              href="/gmail"
-              className="rounded-3xl border border-(--axis-border) bg-(--axis-surface) p-5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] overflow-hidden transition hover:-translate-y-1 cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-500">
-                  <RiMailLine className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold text-(--axis-text)">{gmailUnreadCount}</p>
-                  <p className="text-xs text-(--axis-muted)">Sin leer</p>
-                </div>
-              </div>
-            </Link>
-            )}
-            {enabledWidgets.tasks && (
-            <Link
-              href="/tasks"
-              className="rounded-3xl border border-(--axis-border) bg-(--axis-surface) p-5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] overflow-hidden transition hover:-translate-y-1 cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
-                  <RiTaskLine className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold text-(--axis-text)">{taskStats.pending}</p>
-                  <p className="text-xs text-(--axis-muted)">Pendientes</p>
-                </div>
-              </div>
-            </Link>
-            )}
-            {enabledWidgets.calendar && (
-            <Link
-              href="/calendar"
-              className="rounded-3xl border border-(--axis-border) bg-(--axis-surface) p-5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] overflow-hidden transition hover:-translate-y-1 cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-500">
-                  <RiCalendarLine className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold text-(--axis-text)">{todayEvents.length}</p>
-                  <p className="text-xs text-(--axis-muted)">Hoy</p>
-                </div>
-              </div>
-            </Link>
-            )}
-            {enabledWidgets.storage && (
-            <div className="rounded-3xl border border-(--axis-border) bg-(--axis-surface) p-5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] overflow-hidden">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500">
-                  <RiDriveLine className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold text-(--axis-text)">{storageInfo.usadoGb}</p>
-                  <p className="text-xs text-(--axis-muted)">GB</p>
-                </div>
-              </div>
-            </div>
-)}
-          </div>
+          <StatsCards
+            gmailCount={gmailUnreadCount}
+            tasksCount={taskStats.pending}
+            eventsCount={todayEvents.length}
+            storageUsed={storageInfo.usadoGb}
+          />
+
+          {enabledWidgets.recentFiles && (
+            <RecentFilesSection files={driveFiles} />
+          )}
 
           {enabledWidgets.gmail && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-(--axis-text)">Ultimos correos</h3>
-              <Link href="/gmail" className="text-xs font-semibold text-indigo-500 hover:text-indigo-600">
-                Ver todos <RiExternalLinkLine className="inline h-3 w-3" />
-              </Link>
-            </div>
-            <div className="space-y-2">
-              {(gmailMessages.length ? gmailMessages.slice(0, 5) : []).map((message) => (
-                <a
-                  key={message.id}
-                  href={`https://mail.google.com/mail/u/0/#inbox/${encodeGmailId(message.id)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-3 rounded-2xl border border-(--axis-border) bg-(--axis-surface) p-4 transition hover:border-indigo-300 hover:bg-(--axis-surface-strong) cursor-pointer"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100">
-                    <RiMailLine className="h-5 w-5 text-indigo-600" />
-                  </div>
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <p className="truncate text-sm font-semibold text-(--axis-text)">{message.asunto}</p>
-                    <p className="truncate text-xs text-(--axis-muted)">{message.remitente}</p>
-                  </div>
-                  <RiExternalLinkLine className="h-4 w-4 shrink-0 text-indigo-400" />
-                </a>
-              ))}
-              {!gmailMessages.length && (
-                <p className="text-sm text-(--axis-muted)">No hay correos recientes.</p>
-              )}
-            </div>
-          </div>
+            <RecentEmailsSection messages={gmailMessages} />
           )}
         </div>
 
         <aside className="space-y-6 min-w-0">
           <div className="rounded-3xl border bg-(--axis-surface) p-6 shadow-[0_12px_28px_rgba(15,23,42,0.08)] overflow-hidden">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-(--axis-muted)">Resumen</p>
-                <p className="mt-2 text-lg font-semibold text-(--axis-text)">Buenos dias, {userName}</p>
-                <p className="text-xs text-(--axis-muted)">{calendarEvents.length} eventos esta semana</p>
-              </div>
-              <Link
-                href="/calendar"
-                className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-semibold text-emerald-600 hover:bg-emerald-100"
-              >
-                {todayEvents.length} hoy
-              </Link>
-            </div>
+            <GreetingSection
+              userName={userName}
+              eventsCount={calendarEvents.length}
+              todayEventsCount={todayEvents.length}
+            />
 
             <div className="mt-6">
-              <LearningCharts progress={storageInfo.porcentaje || 0} weeklyBars={weeklyBars} />
+              <LearningCharts
+                progress={storageInfo.porcentaje || 0}
+                weeklyBars={weeklyBars}
+              />
             </div>
             <div className="mt-4 space-y-2">
-              <p className="text-xs font-semibold text-(--axis-muted)">Almacenamiento usado</p>
+              <p className="text-xs font-semibold text-(--axis-muted)">
+                Almacenamiento usado
+              </p>
               <p className="text-2xl font-semibold text-(--axis-text)">
                 {storageInfo.usadoGb} GB
-                <span className="text-sm font-normal text-(--axis-muted)"> / {storageInfo.limiteGb} GB</span>
+                <span className="text-sm font-normal text-(--axis-muted)">
+                  {" "}
+                  / {storageInfo.limiteGb} GB
+                </span>
               </p>
               <div className="mt-1 h-2 rounded-full bg-(--axis-surface-strong)">
                 <div
@@ -298,115 +145,20 @@ const DashboardPage = async () => {
             </div>
           </div>
 
-          <div className="rounded-3xl border bg-(--axis-surface) p-6 shadow-[0_12px_28px_rgba(15,23,42,0.08)] overflow-hidden">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-(--axis-muted)">Drive</p>
-                <p className="mt-2 text-lg font-semibold text-(--axis-text)">Archivos</p>
-                <p className="text-xs text-(--axis-muted)">{driveFiles.length} archivos</p>
-              </div>
-            </div>
-            <div className="mt-6">
-              <DriveBreakdownChart items={driveBreakdownChart} />
-            </div>
-          </div>
+          <DriveSection
+            fileCount={driveFiles.length}
+            breakdown={driveBreakdownChart}
+          />
 
-          <div className="rounded-3xl border bg-(--axis-surface) p-6 shadow-[0_12px_28px_rgba(15,23,42,0.08)] overflow-hidden">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-(--axis-muted)">Tasks</p>
-                <p className="mt-2 text-lg font-semibold text-(--axis-text)">Estado</p>
-              </div>
-              <Link
-                href="/tasks"
-                className="rounded-full bg-(--axis-surface-strong) px-3 py-1 text-[10px] font-semibold text-(--axis-muted)"
-              >
-                {tasks.length} total
-              </Link>
-            </div>
-            <div className="mt-6">
-              <TaskStatusChart pending={taskStats.pending} completed={taskStats.completed} />
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-2 text-center">
-              <div className="rounded-xl bg-(--axis-surface-strong) p-2">
-                <RiTimeLine className="mx-auto h-4 w-4 text-(--axis-amber)" />
-                <p className="text-lg font-semibold text-(--axis-text)">{taskStats.pending}</p>
-                <p className="text-[10px] text-(--axis-muted)">Pendientes</p>
-              </div>
-              <div className="rounded-xl bg-(--axis-surface-strong) p-2">
-                <RiCheckLine className="mx-auto h-4 w-4 text-(--axis-emerald)" />
-                <p className="text-lg font-semibold text-(--axis-text)">{taskStats.completed}</p>
-                <p className="text-[10px] text-(--axis-muted)">Completadas</p>
-              </div>
-            </div>
-          </div>
+          <TaskSection
+            total={tasks.length}
+            pending={taskStats.pending}
+            completed={taskStats.completed}
+          />
 
-          {upcomingTasks.length > 0 && (
-            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-[0_12px_28px_rgba(15,23,42,0.08)] overflow-hidden">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-amber-600">Urgente</p>
-                  <p className="mt-2 text-lg font-semibold text-(--axis-text)">Proximas a vencer</p>
-                  <p className="text-xs text-(--axis-muted)">Vencen en 3 dias</p>
-                </div>
-                <span className="rounded-full bg-amber-100 px-3 py-1 text-[10px] font-semibold text-amber-600">
-                  {upcomingTasks.length}
-                </span>
-              </div>
-              <div className="mt-4 space-y-3">
-                {upcomingTasks.slice(0, 3).map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center justify-between rounded-2xl border border-amber-200 bg-white px-3 py-3"
-                  >
-                    <div className="flex min-w-0 items-center gap-3">
-                      <div className="h-10 w-10 shrink-0 rounded-full bg-amber-100 flex items-center justify-center">
-                        <RiTaskLine className="h-5 w-5 text-amber-500" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold text-(--axis-text) truncate">{task.titulo}</p>
-                        <p className="text-[10px] text-amber-600">Vence: {task.vence}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <UrgentSection tasks={upcomingTasks} />
 
-          <div className="rounded-3xl border bg-(--axis-surface) p-6 shadow-[0_12px_28px_rgba(15,23,42,0.08)] overflow-hidden">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-(--axis-text)">Tareas</h3>
-              <Link href="/tasks" className="text-xs font-semibold text-indigo-500 hover:text-indigo-600">
-                Ver todo
-              </Link>
-            </div>
-            <div className="mt-4 space-y-3">
-              {(tasks.length ? tasks.slice(0, 3) : []).map((task) => (
-                <Link
-                  key={task.id}
-                  href="/tasks"
-                  className="flex items-center justify-between rounded-2xl border bg-(--axis-surface-strong) px-3 py-3 transition hover:bg-(--axis-surface) cursor-pointer"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div className="h-10 w-10 shrink-0 rounded-full bg-linear-to-br from-emerald-200 via-cyan-200 to-sky-200" />
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold text-(--axis-text) truncate">{task.titulo}</p>
-                      <p className="text-[10px] text-(--axis-muted)">
-                        {task.vence ? `Vence: ${task.vence}` : "Sin fecha"}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-semibold text-(--axis-muted)">
-                    {task.estado === "completada" ? "Completada" : "Pendiente"}
-                  </span>
-                </Link>
-              ))}
-              {!tasks.length && (
-                <p className="text-sm text-(--axis-muted)">Sin tareas.</p>
-              )}
-            </div>
-          </div>
+          <MyTasksSection tasks={tasks} />
         </aside>
       </section>
     </section>
