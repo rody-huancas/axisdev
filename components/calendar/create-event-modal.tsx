@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { RiCloseLine } from "react-icons/ri";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import { TimeDropdown } from "./time-dropdown";
 import { timeToMinutes, minutesToTime, buildTimeOptions } from "@/lib/calendar-utils";
 
@@ -43,6 +44,7 @@ const syncEndAfterStart = (start: string, prevEnd: string) => {
 };
 
 export const CreateEventModal = (props: CreateModalProps) => {
+  const { t } = useTranslation();
   const {
     isOpen,
     isLoading,
@@ -104,10 +106,10 @@ export const CreateEventModal = (props: CreateModalProps) => {
         <div className="w-full max-w-3xl overflow-hidden rounded-3xl border border-(--axis-border) bg-(--axis-surface) shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
           <div className="flex items-start justify-between gap-4 border-b border-(--axis-border) px-6 py-5">
             <div className="min-w-0">
-              <p className="text-xs uppercase tracking-[0.3em] text-(--axis-muted)">Nuevo evento</p>
-              <h3 className="mt-2 text-xl font-semibold text-(--axis-text)">Crear en Google Calendar</h3>
+              <p className="text-xs uppercase tracking-[0.3em] text-(--axis-muted)">{t.pages.calendar.newEvent}</p>
+              <h3 className="mt-2 text-xl font-semibold text-(--axis-text)">{t.pages.calendar.createInGoogle}</h3>
               <p className="mt-2 text-sm text-(--axis-muted)">
-                Elige una sola fecha y un rango horario. Puedes usar Mañana/Tarde como atajo.
+                {t.pages.calendar.chooseDate}
               </p>
             </div>
             <button
@@ -125,13 +127,13 @@ export const CreateEventModal = (props: CreateModalProps) => {
               <input
                 value={createTitle}
                 onChange={(e) => setCreateTitle(e.target.value)}
-                placeholder="Titulo"
+                placeholder={t.pages.calendar.titleField}
                 className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3 text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:outline-none sm:col-span-2"
                 disabled={isLoading}
               />
 
               <label className="space-y-2">
-                <span className="text-xs font-semibold text-(--axis-muted)">Fecha</span>
+                <span className="text-xs font-semibold text-(--axis-muted)">{t.pages.calendar.date}</span>
                 <input
                   type="date"
                   value={createDate}
@@ -142,7 +144,7 @@ export const CreateEventModal = (props: CreateModalProps) => {
               </label>
 
               <div className="space-y-2">
-                <span className="text-xs font-semibold text-(--axis-muted)">Bloque</span>
+                <span className="text-xs font-semibold text-(--axis-muted)">{t.pages.calendar.block}</span>
                 <div className="flex items-center gap-1 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) p-1">
                   <button
                     type="button"
@@ -159,7 +161,7 @@ export const CreateEventModal = (props: CreateModalProps) => {
                     )}
                     disabled={isLoading}
                   >
-                    Mañana
+                    {t.pages.calendar.morning}
                   </button>
                   <button
                     type="button"
@@ -176,13 +178,13 @@ export const CreateEventModal = (props: CreateModalProps) => {
                     )}
                     disabled={isLoading}
                   >
-                    Tarde
+                    {t.pages.calendar.afternoon}
                   </button>
                 </div>
               </div>
 
               <TimeDropdown
-                label="Inicio"
+                label={t.pages.calendar.start}
                 value={createStartTime}
                 options={startOptions}
                 disabled={isLoading}
@@ -197,7 +199,7 @@ export const CreateEventModal = (props: CreateModalProps) => {
               />
 
               <TimeDropdown
-                label="Fin"
+                label={t.pages.calendar.end}
                 value={createEndTime}
                 options={endOptions}
                 disabled={isLoading}
@@ -220,7 +222,7 @@ export const CreateEventModal = (props: CreateModalProps) => {
                     disabled={isLoading}
                     className="rounded-full border border-(--axis-border) bg-(--axis-surface-strong) px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-(--axis-muted) transition hover:bg-(--axis-surface) hover:text-(--axis-text) disabled:opacity-50"
                   >
-                    {duration === 30 ? "30 min" : duration === 60 ? "1 hora" : "2 horas"}
+                    {duration === 30 ? t.pages.calendar.duration : duration === 60 ? t.pages.calendar.duration1h : t.pages.calendar.duration2h}
                   </button>
                 ))}
               </div>
@@ -228,7 +230,7 @@ export const CreateEventModal = (props: CreateModalProps) => {
               <input
                 value={createLocation}
                 onChange={(e) => setCreateLocation(e.target.value)}
-                placeholder="Ubicacion (opcional)"
+                placeholder={t.pages.calendar.location}
                 className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3 text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:outline-none sm:col-span-2"
                 disabled={isLoading}
               />
@@ -236,7 +238,7 @@ export const CreateEventModal = (props: CreateModalProps) => {
               <textarea
                 value={createDescription}
                 onChange={(e) => setCreateDescription(e.target.value)}
-                placeholder="Descripcion (opcional)"
+                placeholder={t.pages.calendar.locationDesc}
                 rows={3}
                 className="w-full resize-none rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3 text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:outline-none sm:col-span-2"
                 disabled={isLoading}
@@ -245,7 +247,7 @@ export const CreateEventModal = (props: CreateModalProps) => {
               <input
                 value={createAttendees}
                 onChange={(e) => setCreateAttendees(e.target.value)}
-                placeholder="Asistentes (email, separado por comas)"
+                placeholder={t.pages.calendar.attendees}
                 className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3 text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:outline-none sm:col-span-2"
                 disabled={isLoading}
               />
@@ -258,7 +260,7 @@ export const CreateEventModal = (props: CreateModalProps) => {
                   className="h-5 w-5 rounded border-(--axis-border) text-(--axis-accent) focus:ring-(--axis-accent)"
                   disabled={isLoading}
                 />
-                <span className="text-sm text-(--axis-text)">Crear videollamada (Google Meet)</span>
+                <span className="text-sm text-(--axis-text)">{t.pages.calendar.createMeet}</span>
               </label>
             </div>
           </div>
@@ -270,7 +272,7 @@ export const CreateEventModal = (props: CreateModalProps) => {
               disabled={isLoading}
               className="rounded-2xl border border-(--axis-border) bg-(--axis-surface) px-5 py-2.5 text-sm font-semibold text-(--axis-text) transition hover:bg-(--axis-surface-strong) disabled:opacity-50"
             >
-              Cancelar
+              {t.common.cancel}
             </button>
             <button
               type="button"
@@ -278,7 +280,7 @@ export const CreateEventModal = (props: CreateModalProps) => {
               disabled={isLoading}
               className="rounded-2xl bg-(--axis-accent) px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
             >
-              {isLoading ? "Creando..." : "Crear evento"}
+              {isLoading ? t.pages.calendar.creating : t.pages.calendar.create}
             </button>
           </div>
         </div>
