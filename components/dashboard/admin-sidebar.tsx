@@ -123,19 +123,32 @@ export const AdminSidebar = ({ isMobileOpen, onMobileClose, isDesktopOpen }: Adm
         </div>
 
         <div className="space-y-3">
+          {(() => {
+            const settingsActive = pathname === "/settings";
+            return (
           <Link
             href="/settings"
             onClick={onMobileClose}
             className={cn(
-              "flex items-center gap-3 rounded-2xl border border-(--axis-border) bg-(--axis-surface) px-4 py-3 text-sm font-medium text-(--axis-muted) transition hover:bg-(--axis-surface-strong)",
+              "group flex items-center gap-3 rounded-2xl border border-(--axis-border) bg-(--axis-surface) px-4 py-3 text-sm font-medium transition",
+              settingsActive 
+                ? "bg-(--axis-accent) text-white shadow-[0_8px_20px_rgba(108,99,255,0.25)]" 
+                : "text-(--axis-muted) hover:bg-(--axis-surface-strong) hover:border-(--axis-accent)/30",
               isCollapsed && "lg:justify-center lg:px-3",
             )}
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-(--axis-surface-strong) text-(--axis-muted)">
+            <span className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-full transition",
+              settingsActive 
+                ? "bg-white/20 text-white" 
+                : "bg-(--axis-surface-strong) text-(--axis-muted) group-hover:bg-(--axis-accent)/10 group-hover:text-(--axis-accent)"
+            )}>
               <RiSettings3Line className="h-4 w-4" />
             </span>
             <span className={cn(isCollapsed && "lg:hidden")}>Configuracion</span>
           </Link>
+            );
+          })()}
 
           <form action={signOutAction}>
             <button
