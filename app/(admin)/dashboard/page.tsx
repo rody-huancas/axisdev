@@ -1,14 +1,14 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-
+import type { TareaPendiente } from "@/lib/types/google-service";
 import { auth } from "@/auth";
-import { DriveBreakdownChart } from "@/components/dashboard/drive-breakdown-chart";
 import { LearningCharts } from "@/components/dashboard/learning-charts";
 import { TaskStatusChart } from "@/components/dashboard/task-status-chart";
-import { fetchCalendarEvents, fetchGmailPreview, fetchGmailUnreadCount, fetchRecentFiles, fetchStorageInfo, fetchTasksPreview } from "@/services";
+import { DriveBreakdownChart } from "@/components/dashboard/drive-breakdown-chart";
+import { getOrCreateUserSettings } from "@/lib/settings";
 import { computeStorageBreakdown, computeWeeklyBars, computeTaskStats } from "@/lib/utils/dashboard-storage";
-import type { TareaPendiente } from "@/lib/types/google-service";
-import { RiMailLine, RiCalendarLine, RiTaskLine, RiDriveLine, RiExternalLinkLine, RiFileLine, RiCheckLine, RiTimeLine } from "react-icons/ri";
+import { fetchCalendarEvents, fetchGmailPreview, fetchGmailUnreadCount, fetchRecentFiles, fetchStorageInfo, fetchTasksPreview } from "@/services";
+import { RiMailLine, RiCalendarLine, RiTaskLine, RiDriveLine, RiExternalLinkLine, RiCheckLine, RiTimeLine } from "react-icons/ri";
 
 const encodeGmailId = (id: string) => {
   return id.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -38,16 +38,21 @@ const DashboardPage = async () => {
 
   const userName = session?.user?.name?.split(" ")[0] ?? "Sofia";
   const userEmail = session?.user?.email ?? null;
-  const userImage = session?.user?.image ?? null;
 
-  const [filesResult, eventsResult, storageResult, tasksResult, gmailResult, gmailUnreadResult] = await Promise.all([
+  const [filesResult, eventsResult, storageResult, tasksResult, gmailResult, gmailUnreadResult, settings] = await Promise.all([
     fetchRecentFiles(),
     fetchCalendarEvents(),
     fetchStorageInfo(),
     fetchTasksPreview(),
     fetchGmailPreview(),
     fetchGmailUnreadCount(),
+    getOrCreateUserSettings(userEmail!),
   ]);
+
+  const enabledWidgets = settings.widgets?.reduce((acc, w) => {
+    acc[w.id] = w.enabled;
+    return acc;
+  }, {} as Record<string, boolean>) ?? {};
 
   const driveFiles = filesResult.ok ? filesResult.data : [];
   const calendarEvents = eventsResult.ok ? eventsResult.data : [];
@@ -161,6 +166,7 @@ const DashboardPage = async () => {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {enabledWidgets.gmail && (
             <Link
               href="/gmail"
               className="rounded-3xl border border-(--axis-border) bg-(--axis-surface) p-5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] overflow-hidden transition hover:-translate-y-1 cursor-pointer"
@@ -175,6 +181,8 @@ const DashboardPage = async () => {
                 </div>
               </div>
             </Link>
+            )}
+            {enabledWidgets.tasks && (
             <Link
               href="/tasks"
               className="rounded-3xl border border-(--axis-border) bg-(--axis-surface) p-5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] overflow-hidden transition hover:-translate-y-1 cursor-pointer"
@@ -189,6 +197,8 @@ const DashboardPage = async () => {
                 </div>
               </div>
             </Link>
+            )}
+            {enabledWidgets.calendar && (
             <Link
               href="/calendar"
               className="rounded-3xl border border-(--axis-border) bg-(--axis-surface) p-5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] overflow-hidden transition hover:-translate-y-1 cursor-pointer"
@@ -203,6 +213,8 @@ const DashboardPage = async () => {
                 </div>
               </div>
             </Link>
+            )}
+            {enabledWidgets.storage && (
             <div className="rounded-3xl border border-(--axis-border) bg-(--axis-surface) p-5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] overflow-hidden">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500">
@@ -214,68 +226,10 @@ const DashboardPage = async () => {
                 </div>
               </div>
             </div>
+)}
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-(--axis-text)">Archivos recientes</h3>
-              <Link href="/drive" className="text-xs font-semibold text-indigo-500 hover:text-indigo-600">
-                Ver todo <RiExternalLinkLine className="inline h-3 w-3" />
-              </Link>
-            </div>
-            <div className="grid gap-4 lg:grid-cols-2">
-              {(driveFiles.length
-                ? driveFiles.slice(0, 4).map((file, index) => ({
-                    title: file.nombre,
-                    category: file.tipo,
-                    updated: file.actualizado,
-                    progress: Math.min(90, 40 + index * 15),
-                    label: `Archivo ${index + 1}`,
-                    tone: [
-                      "from-violet-500 via-indigo-500 to-sky-500",
-                      "from-rose-500 via-fuchsia-500 to-purple-500",
-                      "from-sky-500 via-cyan-500 to-emerald-400",
-                      "from-emerald-500 via-teal-500 to-cyan-500",
-                    ][index % 4],
-                  }))
-                : storageBreakdown.slice(0, 2).map((item, index) => ({
-                    title: `${item.label} recientes`,
-                    category: item.label,
-                    updated: "Sin datos",
-                    progress: item.percentage,
-                    label: "Actualizado hoy",
-                    tone: index === 0 ? "from-violet-500 via-indigo-500 to-sky-500" : "from-rose-500 via-fuchsia-500 to-purple-500",
-                  }))).map((item) => (
-                <Link
-                  key={item.title}
-                  href="/drive"
-                  className="group rounded-3xl border bg-(--axis-surface) p-5 shadow-[0_12px_28px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 overflow-hidden cursor-pointer"
-                >
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                    <div
-                      className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-linear-to-br ${item.tone} sm:h-20 sm:w-20`}
-                    >
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.45),transparent)]" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <RiFileLine className="h-6 w-6 text-white/80" />
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <div className="flex min-w-0 flex-wrap items-center gap-2">
-                        <span className="rounded-full bg-(--axis-surface-strong) px-2 py-1 text-[10px] font-semibold text-(--axis-muted)">
-                          {item.category}
-                        </span>
-                        <span className="text-[10px] text-(--axis-muted)">{item.label}</span>
-                      </div>
-                      <p className="text-sm font-semibold text-(--axis-text) truncate">{item.title}</p>
-                      <p className="text-xs text-(--axis-muted)">Actualizado {item.updated}</p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-
+          {enabledWidgets.gmail && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-(--axis-text)">Ultimos correos</h3>
@@ -307,6 +261,7 @@ const DashboardPage = async () => {
               )}
             </div>
           </div>
+          )}
         </div>
 
         <aside className="space-y-6 min-w-0">
