@@ -3,8 +3,9 @@
 import { useMemo, useState } from "react";
 import { sileo } from "sileo";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import type { GmailMensaje } from "@/services/google-service";
-import { RiArrowLeftLine, RiDeleteBin6Line, RiInboxLine, RiMailLine, RiRefreshLine, RiReplyLine, RiSearchLine, RiSpamLine, RiStarLine, RiTimeLine } from "react-icons/ri";
+import { RiArrowLeftLine, RiArrowRightLine, RiInboxLine, RiMailLine, RiRefreshLine, RiSearchLine } from "react-icons/ri";
 
 type GmailClientProps = {
   initialItems: GmailMensaje[];
@@ -16,15 +17,15 @@ type GmailMessageFull = GmailMensaje & {
   htmlContent ?: string;
 };
 
-const formatDate = (iso: string) => {
+const formatDate = (iso: string, t: any) => {
   const date = new Date(iso);
   const now  = new Date();
   const diff = now.getTime() - date.getTime();
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-  if (days === 0) return "Hoy";
-  if (days === 1) return "Ayer";
-  if (days < 7) return `${days} dias atras`;
+  if (days === 0) return t.pages.gmail.hoy;
+  if (days === 1) return t.pages.gmail.ayer;
+  if (days < 7) return `${days} ${t.pages.gmail.diasAtras}`;
   return date.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
 };
 
@@ -36,6 +37,7 @@ const getSnippetClean = (snippet: string) => {
 const ITEMS_PER_PAGE = 20;
 
 export const GmailClient = ({ initialItems }: GmailClientProps) => {
+  const { t } = useTranslation();
   const [items       , setItems       ] = useState<GmailMensaje[]>(initialItems);
   const [query       , setQuery       ] = useState<string>("");
   const [isLoading   , setIsLoading   ] = useState<boolean>(false);
@@ -93,9 +95,9 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
       setReplyText("");
     };
     sileo.promise(run(), {
-      loading: { title: "Enviando..." },
-      success: { title: "Enviado" },
-      error: { title: "Error al enviar" },
+      loading: { title: t.pages.gmail.sending },
+      success: { title: t.pages.gmail.sent },
+      error: { title: t.pages.gmail.sendError },
     });
     try {
       await run();
@@ -117,9 +119,9 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
     };
 
     sileo.promise(run(), {
-      loading: { title: "Actualizando..." },
-      success: { title: "Actualizado" },
-      error: { title: "Error" },
+      loading: { title: t.pages.gmail.updating },
+      success: { title: t.pages.gmail.updated },
+      error: { title: t.pages.gmail.error },
     });
 
     try {
@@ -143,7 +145,7 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
               setQuery(event.target.value);
               setPage(1);
             }}
-            placeholder="Buscar mensajes..."
+            placeholder={t.pages.gmail.searchMessages}
             className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) py-3 pl-11 pr-4 text-sm text-(--axis-text) placeholder:text-(--axis-muted) focus:border-[color-mix(in_srgb,var(--axis-accent)_45%,var(--axis-border))] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--axis-accent)_22%,transparent)]"
           />
         </div>
@@ -152,7 +154,7 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
           onClick={handleRefresh}
           disabled={isLoading}
           className="flex h-11 w-11 items-center justify-center rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) text-(--axis-muted) transition hover:bg-(--axis-surface) hover:text-(--axis-accent) disabled:opacity-50"
-          title="Actualizar"
+          title={t.pages.gmail.refresh}
         >
           <RiRefreshLine className={cn("h-5 w-5", isLoading && "animate-spin")} />
         </button>
@@ -183,7 +185,7 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
                   <p className="mt-0.5 truncate text-xs font-medium text-(--axis-muted)">{item.asunto}</p>
                   <p className="mt-1 line-clamp-2 text-xs text-(--axis-muted)">{getSnippetClean(item.snippet)}</p>
                 </div>
-                <span className="shrink-0 text-xs tabular-nums text-(--axis-muted)">{formatDate(new Date().toISOString())}</span>
+                <span className="shrink-0 text-xs tabular-nums text-(--axis-muted)">{formatDate(new Date().toISOString(), t)}</span>
               </div>
             ))}
           </div>
@@ -192,7 +194,7 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-(--axis-surface-strong) ring-1 ring-(--axis-border)">
               <RiInboxLine className="h-7 w-7 text-(--axis-muted)" />
             </div>
-            <p className="mt-4 text-sm font-semibold text-(--axis-text)">No hay mensajes</p>
+            <p className="mt-4 text-sm font-semibold text-(--axis-text)">{t.pages.gmail.noEmails}</p>
             <p className="mt-1 max-w-sm text-sm text-(--axis-muted)">
               {query ? "Prueba otro termino de busqueda." : "Tu bandeja de entrada esta vacia."}
             </p>
@@ -208,7 +210,7 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
             disabled={page === 1 || isLoading}
             className="rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-(--axis-text) transition hover:bg-(--axis-surface) disabled:opacity-50"
           >
-            Anterior
+            {t.pages.gmail.previous}
           </button>
           <span className="text-xs text-(--axis-muted)">
             {page} / {totalPages}
@@ -219,7 +221,8 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
             disabled={page === totalPages || isLoading}
             className="rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-(--axis-text) transition hover:bg-(--axis-surface) disabled:opacity-50"
           >
-            Siguiente
+            {t.pages.gmail.next}
+            <RiArrowRightLine className="h-4 w-4" />
           </button>
         </div>
       )}
@@ -231,7 +234,7 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
             <div className="w-full max-w-5xl overflow-hidden rounded-3xl border border-(--axis-border) bg-(--axis-surface) shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
               <div className="flex items-start justify-between gap-4 border-b border-(--axis-border) px-6 py-5">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs uppercase tracking-[0.3em] text-(--axis-accent)">Mensaje</p>
+                  <p className="text-xs uppercase tracking-[0.3em] text-(--axis-accent)">{t.pages.gmail.message || "Mensaje"}</p>
                   <h3 className="mt-2 truncate text-xl font-semibold text-(--axis-text)">{selected.asunto}</h3>
                   <p className="mt-1 text-sm text-(--axis-muted)">{selected.remitente}</p>
                   {selected.fecha && <p className="mt-1 text-xs text-(--axis-muted)">{selected.fecha}</p>}
@@ -249,7 +252,7 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
                 {selected.htmlContent ? (
                   <div className="prose prose-invert prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: selected.htmlContent }} />
                 ) : (
-                  <div className="whitespace-pre-wrap text-sm leading-relaxed text-(--axis-text)">{selected.snippet || "Sin contenido"}</div>
+                  <div className="whitespace-pre-wrap text-sm leading-relaxed text-(--axis-text)">{selected.snippet || t.pages.gmail.noContent}</div>
                 )}
               </div>
               <div className="shrink-0 flex items-center justify-end gap-3 border-t border-(--axis-border) bg-(--axis-surface) px-6 py-4">
@@ -258,7 +261,7 @@ export const GmailClient = ({ initialItems }: GmailClientProps) => {
                   onClick={() => setIsDetailOpen(false)}
                   className="rounded-2xl border border-(--axis-border) px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong)"
                 >
-                  Cerrar
+                  {t.pages.calendar.close || t.common.cancel}
                 </button>
               </div>
 
