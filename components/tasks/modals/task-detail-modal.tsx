@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { RiCloseLine, RiDeleteBin6Line, RiEditLine, RiCheckboxCircleLine, RiCheckboxLine } from "react-icons/ri";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import type { TareaPendiente } from "@/services/google-service";
 
 type Props = {
@@ -35,6 +36,7 @@ const parseDisplayDateToInput = (displayDate: string): string => {
 };
 
 export const TaskDetailModal = (props: Props) => {
+  const { t } = useTranslation();
   const { task, isOpen, isEditOpen, onClose, onEditOpen, onEditClose, onUpdate, onToggle, onDelete, isLoading } = props;
 
   const [editTitle, setEditTitle] = useState<string>("");
@@ -75,7 +77,7 @@ export const TaskDetailModal = (props: Props) => {
       <div className="relative z-10 flex h-dvh items-center justify-center p-4">
         <div className="w-full max-w-2xl overflow-hidden rounded-3xl border border-(--axis-border) bg-(--axis-surface) shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
           <div className="flex items-center justify-between border-b border-(--axis-border) px-6 py-4">
-            <h3 className="text-xl font-semibold text-(--axis-text)">Detalle</h3>
+            <h3 className="text-xl font-semibold text-(--axis-text)">{t.pages.tasks.detail || "Detalle"}</h3>
             <button
               type="button"
               onClick={handleClose}
@@ -90,7 +92,7 @@ export const TaskDetailModal = (props: Props) => {
               <>
                 <div>
                   <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted)">
-                    Titulo
+                    {t.pages.tasks.titleField || "Titulo"}
                   </label>
                   <input
                     value={editTitle}
@@ -101,7 +103,7 @@ export const TaskDetailModal = (props: Props) => {
 
                 <div>
                   <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted)">
-                    Fecha limite
+                    {t.pages.tasks.dueDate || "Fecha limite"}
                   </label>
                   <input
                     type="date"
@@ -113,7 +115,7 @@ export const TaskDetailModal = (props: Props) => {
 
                 <div>
                   <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted)">
-                    Notas / Detalles
+                    {t.pages.tasks.notes || "Notas / Detalles"}
                   </label>
                   <textarea
                     value={editNotes}
@@ -134,7 +136,7 @@ export const TaskDetailModal = (props: Props) => {
                     }}
                     className="rounded-2xl border border-(--axis-border) px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong)"
                   >
-                    Cancelar
+                    {t.common.cancel}
                   </button>
                   <button
                     type="button"
@@ -142,16 +144,16 @@ export const TaskDetailModal = (props: Props) => {
                     disabled={isLoading || !editTitle.trim()}
                     className="rounded-2xl bg-(--axis-accent) px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:opacity-90 disabled:opacity-50"
                   >
-                    {isLoading ? "Guardando..." : "Guardar"}
-                  </button>
+{isLoading ? t.common.saving : t.common.save}
+                    </button>
                 </div>
               </>
             ) : (
               <>
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-accent)">
-                    Tarea
-                  </p>
+<p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-accent)">
+                      {t.pages.tasks.title || "Tarea"}
+                    </p>
                   <p
                     className={cn(
                       "text-xl font-semibold text-(--axis-text)",
@@ -165,7 +167,7 @@ export const TaskDetailModal = (props: Props) => {
                 {task.vence && (
                   <div>
                     <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-accent)">
-                      Vence
+                      {t.pages.tasks.due || "Vence"}
                     </p>
                     <p className="text-base text-(--axis-text)">{task.vence}</p>
                   </div>
@@ -174,7 +176,7 @@ export const TaskDetailModal = (props: Props) => {
                 {task.descripcion && (
                   <div>
                     <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-accent)">
-                      Notas
+                      {t.pages.tasks.notes || "Notas"}
                     </p>
                     <p className="whitespace-pre-wrap text-base text-(--axis-text)">
                       {task.descripcion}
@@ -190,7 +192,7 @@ export const TaskDetailModal = (props: Props) => {
                     className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-rose-400 transition hover:bg-rose-500/20 disabled:opacity-50"
                   >
                     <RiDeleteBin6Line className="mr-2 inline h-4 w-4" />
-                    {isLoading ? "Eliminando..." : "Eliminar"}
+                    {isLoading ? t.pages.tasks.deleting : t.pages.tasks.delete}
                   </button>
 
                   <div className="flex gap-2">
@@ -200,7 +202,7 @@ export const TaskDetailModal = (props: Props) => {
                       className="flex items-center gap-2 rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-(--axis-text) transition hover:bg-(--axis-surface)"
                     >
                       <RiEditLine className="h-4 w-4" />
-                      Editar
+                      {t.pages.tasks.edit}
                     </button>
                     <button
                       type="button"
@@ -210,12 +212,12 @@ export const TaskDetailModal = (props: Props) => {
                       {task.estado === "pendiente" ? (
                         <>
                           <RiCheckboxCircleLine className="h-4 w-4" />
-                          Completar
+                          {t.pages.tasks.complete}
                         </>
                       ) : (
                         <>
                           <RiCheckboxLine className="h-4 w-4" />
-                          Reabrir
+                          {t.pages.tasks.reopen}
                         </>
                       )}
                     </button>
