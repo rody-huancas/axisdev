@@ -1,8 +1,6 @@
-"use client";
-
 import { cn } from "@/lib/utils";
-import { RiEyeLine, RiCheckboxCircleLine, RiDeleteBin6Line } from "react-icons/ri";
 import type { TareaPendiente } from "@/services/google-service";
+import { RiEyeLine, RiCheckboxCircleLine, RiDeleteBin6Line } from "react-icons/ri";
 
 type TaskItemProps = {
   task         : TareaPendiente;
@@ -12,7 +10,7 @@ type TaskItemProps = {
   tasklistName?: string;
 };
 
-export const TaskItem = ({ task, onToggle, onDelete, onSelect, tasklistName }: TaskItemProps) => {
+export const TaskItemList = ({ task, onToggle, onDelete, onSelect, tasklistName }: TaskItemProps) => {
   const isCompleted = task.estado === "completada";
 
   return (
@@ -37,6 +35,7 @@ export const TaskItem = ({ task, onToggle, onDelete, onSelect, tasklistName }: T
               {tasklistName}
             </span>
           )}
+          
           {task.vence && (
             <span className={cn(
               "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
@@ -45,6 +44,7 @@ export const TaskItem = ({ task, onToggle, onDelete, onSelect, tasklistName }: T
               {task.vence}
             </span>
           )}
+          
           {task.descripcion && (
             <span className="inline-flex items-center rounded-full bg-(--axis-border)/40 px-2 py-0.5 text-[10px] font-medium text-(--axis-muted) max-w-35 truncate">
               {task.descripcion}
@@ -62,6 +62,7 @@ export const TaskItem = ({ task, onToggle, onDelete, onSelect, tasklistName }: T
         >
           <RiEyeLine className="h-4 w-4" />
         </button>
+
         <button
           type="button"
           onClick={() => onToggle(task, !isCompleted)}
@@ -75,6 +76,7 @@ export const TaskItem = ({ task, onToggle, onDelete, onSelect, tasklistName }: T
         >
           <RiCheckboxCircleLine className="h-4 w-4" />
         </button>
+
         <button
           type="button"
           onClick={() => onDelete(task)}

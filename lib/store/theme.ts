@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-type ThemeMode = "light" | "dark";
+export type ThemeMode = "light" | "dark";
 
-type ThemeState = {
+export type ThemeState = {
   theme      : ThemeMode;
   setTheme   : (theme: ThemeMode) => void;
   toggleTheme: () => void;
