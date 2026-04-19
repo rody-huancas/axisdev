@@ -82,8 +82,8 @@ export const fetchGmailPreview = async (): Promise<ServiceResult<GmailMensaje[]>
           const headers = message.payload?.headers ?? [];
           return {
             id       : message.id,
-            asunto   : getHeaderValue(headers, "Subject") || "Sin asunto",
-            remitente: getHeaderValue(headers, "From") || "Remitente desconocido",
+            asunto   : getHeaderValue(headers, "Subject") || "",
+            remitente: getHeaderValue(headers, "From") || "",
             snippet  : message.snippet ?? "",
           };
         },
@@ -143,8 +143,8 @@ export const fetchGmailMessages = async (maxResults = 50): Promise<ServiceResult
           const headers = message.payload?.headers ?? [];
           return {
             id       : message.id,
-            asunto   : getHeaderValue(headers, "Subject") || "Sin asunto",
-            remitente: getHeaderValue(headers, "From")    || "Remitente desconocido",
+            asunto   : getHeaderValue(headers, "Subject") || "",
+            remitente: getHeaderValue(headers, "From")    || "",
             snippet  : message.snippet ?? "",
           };
         },
