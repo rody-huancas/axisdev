@@ -9,8 +9,10 @@ type EventDetailModalProps = {
 };
 
 export const EventDetailModal = ({ isOpen, selected, onClose }: EventDetailModalProps) => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   if (!isOpen || !selected) return null;
+
+  const locale = language === "en" ? "en-US" : "es-ES";
 
   return (
     <div className="fixed inset-0 z-50">
@@ -20,9 +22,9 @@ export const EventDetailModal = ({ isOpen, selected, onClose }: EventDetailModal
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <p className="text-xs uppercase tracking-[0.3em] text-(--axis-muted)">{t.pages.calendar.event}</p>
-              <h3 className="mt-2 truncate text-xl font-semibold text-(--axis-text)">{selected.title}</h3>
+              <h3 className="mt-2 truncate text-xl font-semibold text-(--axis-text)">{selected.title || t.pages.calendar.untitled}</h3>
               <p className="mt-2 text-sm text-(--axis-muted)">
-                {new Date(selected.start).toLocaleString("es-ES")} - {new Date(selected.end).toLocaleString("es-ES")}
+                {new Date(selected.start).toLocaleString(locale)} - {new Date(selected.end).toLocaleString(locale)}
               </p>
             </div>
             {selected.htmlLink && (
