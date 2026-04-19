@@ -108,7 +108,7 @@ export async function GET(request: Request) {
     const endIso   = toEndIso(event.end?.dateTime, event.end?.date);
     return {
       id         : event.id,
-      title      : event.summary ?? "(Sin titulo)",
+      title      : event.summary ?? "",
       start      : startIso,
       end        : endIso,
       meetLink   : extractMeetLink(event),
