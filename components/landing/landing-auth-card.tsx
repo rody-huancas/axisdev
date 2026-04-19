@@ -7,7 +7,7 @@ export const LandingAuthCard = () => {
   const t = usePageTranslations();
 
   return (
-    <div className="max-w-95 rounded-2xl border border-[#DDDBD3] bg-white p-4.5 flex flex-col gap-3">
+    <div className="max-w-95 rounded-2xl border border-[#DDDBD3] bg-white p-4.5 flex flex-col gap-3 shadow-[0_20px_55px_rgba(17,17,17,0.10)]">
       <span
         className="text-[9px] uppercase tracking-[0.2em] text-gray-700 font-medium"
         style={{ fontFamily: "var(--font-geist-mono)" }}
