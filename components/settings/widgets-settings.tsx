@@ -58,7 +58,7 @@ export const WidgetsSettings = ({ enabledWidgets, onToggle, t }: WidgetsSettings
           </div>
           
           <Toggle
-            enabled={enabledWidgets[widget.id] ?? false}
+            enabled={enabledWidgets[widget.id] ?? true}
             onChange={() => onToggle(widget.id)}
           />
         </div>
