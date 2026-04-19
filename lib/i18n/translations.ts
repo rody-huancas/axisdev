@@ -102,6 +102,18 @@ export const translations = {
       },
       tags   : ["Sincronización en tiempo real", "Visibilidad total", "Control centralizado"],
       preview: {
+        demoUserName    : "Juan D.",
+        demoUserInitials: "JD",
+        demoFileName    : "Propuesta Q2.docx",
+        dashboardTitle  : "Dashboard",
+        services: {
+          drive   : "Drive",
+          calendar: "Calendario",
+          gmail   : "Gmail",
+          tasks   : "Tareas",
+          storage : "Storage",
+          contacts: "Contactos",
+        },
         stats: {
           pendingTasks : "Tareas pendientes",
           meetingsToday: "Reuniones hoy",
@@ -436,6 +448,18 @@ export const translations = {
       },
       tags   : ["Real-time sync", "Full visibility", "Centralized control"],
       preview: {
+        demoUserName    : "John D.",
+        demoUserInitials: "JD",
+        demoFileName    : "Q2 Proposal.docx",
+        dashboardTitle  : "Dashboard",
+        services: {
+          drive   : "Drive",
+          calendar: "Calendar",
+          gmail   : "Gmail",
+          tasks   : "Tasks",
+          storage : "Storage",
+          contacts: "Contacts",
+        },
         stats: {
           pendingTasks : "Pending tasks",
           meetingsToday: "Meetings today",

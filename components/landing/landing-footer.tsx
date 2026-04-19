@@ -10,7 +10,7 @@ const LandingFooterInner = () => {
   const t = usePageTranslations();
 
   return (
-    <footer className="flex shrink-0 items-center justify-between border-t border-[#DDDBD3] px-14 py-3" style={{ background: "#EEEDE7" }}>
+    <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-[#DDDBD3] px-5 py-4 md:px-14" style={{ background: "#EEEDE7" }}>
       <p className="text-[10.5px] text-[#777]" style={{ fontFamily: "var(--font-geist-mono)" }}>
         {t.landing.footer.builtBy}{" "}
         <a href="https://rody-huancas.vercel.app/" target="_blank" rel="noopener noreferrer" className="font-semibold text-[#111] underline underline-offset-2 decoration-[#BFEF38]">

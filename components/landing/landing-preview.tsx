@@ -10,23 +10,23 @@ const LandingPreviewInner = () => {
   const t = usePageTranslations();
 
   const previewData = {
-    userInitials: "JD",
-    userName: "Juan D.",
-    stats: [
+    userInitials: t.landing.preview.demoUserInitials,
+    userName    : t.landing.preview.demoUserName,
+    stats       : [
       { val: "24", label: t.landing.preview.stats.pendingTasks, color: "#16a34a" },
       { val: "6", label: t.landing.preview.stats.meetingsToday, color: "#111" },
       { val: "138", label: t.landing.preview.stats.unreadEmails, color: "#d97706" },
     ],
     services: [
-      { icon: "📁", name: "Drive", dot: "#4285F4" },
-      { icon: "📅", name: "Calendar", dot: "#EA4335" },
-      { icon: "📧", name: "Gmail", dot: "#EA4335" },
-      { icon: "✅", name: "Tasks", dot: "#34A853" },
-      { icon: "☁️", name: "Storage", dot: "#FBBC05" },
-      { icon: "👥", name: "Contacts", dot: "#4285F4" },
+      { icon: "📁", name: t.landing.preview.services.drive, dot: "#4285F4" },
+      { icon: "📅", name: t.landing.preview.services.calendar, dot: "#EA4335" },
+      { icon: "📧", name: t.landing.preview.services.gmail, dot: "#EA4335" },
+      { icon: "✅", name: t.landing.preview.services.tasks, dot: "#34A853" },
+      { icon: "☁️", name: t.landing.preview.services.storage, dot: "#FBBC05" },
+      { icon: "👥", name: t.landing.preview.services.contacts, dot: "#4285F4" },
     ],
     recentActivity: [
-      { icon: "📄", name: "Propuesta Q2.docx", desc: t.landing.preview.activity.editedInDrive, time: "2m", bg: "#4285F418", color: "#4285F4" },
+      { icon: "📄", name: t.landing.preview.demoFileName, desc: t.landing.preview.activity.editedInDrive, time: "2m", bg: "#4285F418", color: "#4285F4" },
       { icon: "📅", name: t.landing.preview.activity.teamMeeting, desc: t.landing.preview.activity.todayAt, time: "1h", bg: "#EA443518", color: "#EA4335" },
       { icon: "📧", name: t.landing.preview.activity.messageFromCarlos, desc: t.landing.preview.activity.sprintDeliverables, time: "3h", bg: "#34A85318", color: "#34A853" },
     ],
@@ -34,7 +34,7 @@ const LandingPreviewInner = () => {
 
   return (
     <div className="relative hidden lg:flex justify-center items-center">
-    <div className="w-full max-w-105 overflow-hidden rounded-[18px] border border-[#DDDBD3] bg-white">
+      <div className="axis-float w-full max-w-115 overflow-hidden rounded-[18px] border border-[#DDDBD3] bg-white shadow-[0_28px_80px_rgba(17,17,17,0.12)]">
       <div className="flex items-center gap-1.5 border-b border-[#E8E6DF] bg-[#F4F3EE] px-3.5 py-2.5">
         <div className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
         <div className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
@@ -47,7 +47,7 @@ const LandingPreviewInner = () => {
       <div className="flex flex-col gap-3.5 p-4">
         <div className="flex items-center justify-between">
           <span className="text-[15px] font-bold text-[#111]" style={{ letterSpacing: "-0.02em" }}>
-            Dashboard
+            {t.landing.preview.dashboardTitle}
           </span>
           <div className="flex items-center gap-2">
             <span className="text-[11px] text-[#aaa]" style={{ fontFamily: "var(--font-geist-mono)" }}>
@@ -112,7 +112,7 @@ const LandingPreviewInner = () => {
       </div>
     </div>
 
-    <div className="absolute -bottom-4 -right-3 z-10 flex items-center gap-2.5 rounded-[14px] px-4 py-2.5" style={{ background: "#BFEF38" }}>
+    <div className="absolute -bottom-4 -right-3 z-10 flex items-center gap-2.5 rounded-[14px] px-4 py-2.5 shadow-[0_18px_40px_rgba(17,17,17,0.16)]" style={{ background: "#BFEF38" }}>
       <span className="text-base">⚡</span>
       <div>
         <div className="text-[11px] font-bold text-[#111]">{t.landing.preview.highlightTitle}</div>

@@ -20,9 +20,21 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
 
   const loadLanguage = useCallback(() => {
     const stored = localStorage.getItem("language") as Language | null;
+    
     if (stored && (stored === "es" || stored === "en")) {
       setLanguageState(stored);
+      setIsLoaded(true);
+      return;
     }
+
+    const candidates = [navigator.language, ...(navigator.languages ?? [])]
+      .filter(Boolean)
+      .map((value) => String(value).toLowerCase());
+
+    const next = candidates.some((value) => value.startsWith("es")) ? "es" : "en";
+
+    setLanguageState(next);
+    localStorage.setItem("language", next);
     setIsLoaded(true);
   }, []);
 
@@ -39,6 +51,11 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
       window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange as EventListener);
     };
   }, [loadLanguage]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    document.documentElement.lang = language;
+  }, [language, isLoaded]);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
