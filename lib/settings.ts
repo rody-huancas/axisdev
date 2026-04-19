@@ -44,7 +44,7 @@ export async function createUserSettings(userEmail: string): Promise<UserSetting
       { id: "tasks", enabled: true },
       { id: "calendar", enabled: true },
       { id: "storage", enabled: true },
-      { id: "recentFiles", enabled: false },
+      { id: "recentFiles", enabled: true },
     ],
     notifications: [
       { id: "push", enabled: true },
