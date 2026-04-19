@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist_Mono, Poppins } from "next/font/google";
 import Providers from "@/app/providers";
 import { cn } from "@/lib/utils";
-import { themeScript } from "@/utils/theme-script";
+import { themeScript } from "@/lib/theme-script";
 import "@/styles/globals.css";
 
 const poppins = Poppins({
