@@ -2,6 +2,7 @@
 
 import { Bar, BarChart, PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer, Tooltip } from "recharts";
 import { useThemeStore } from "@/lib/store/theme";
+import { usePageTranslations } from "@/lib/i18n";
 
 type LearningChartsProps = {
   progress: number;
@@ -9,20 +10,20 @@ type LearningChartsProps = {
 };
 
 export const LearningCharts = ({ progress, weeklyBars }: LearningChartsProps) => {
-  const theme = useThemeStore((s) => s.theme);
+  const t      = usePageTranslations();
+  const theme  = useThemeStore((s) => s.theme);
   const isDark = theme === "dark";
 
-  const radialData = [{ name: "Progreso", value: progress }];
+  const radialData = [{ name: t.dashboard.learning.progress, value: progress }];
   const barData = weeklyBars.map((value, index) => ({
-    name: `Dia ${index + 1}`,
+    name: `${t.dashboard.learning.day} ${index + 1}`,
     value,
   }));
 
   const hasData = weeklyBars.some((v) => v > 0);
 
-  const accentColor = isDark ? "#8b5cf6" : "#6c63ff";
+  const accentColor  = isDark ? "#8b5cf6" : "#6c63ff";
   const accent2Color = isDark ? "#38bdf8" : "#60a5fa";
-  const barBg = isDark ? "rgba(56, 189, 248, 0.15)" : "rgba(96, 165, 250, 0.2)";
 
   return (
     <div className="grid gap-6 md:grid-cols-[140px_1fr]">
@@ -60,7 +61,7 @@ export const LearningCharts = ({ progress, weeklyBars }: LearningChartsProps) =>
                   fontSize: 12,
                 }}
                 labelStyle={{ color: isDark ? "#e2e8f0" : "#0f172a" }}
-                formatter={(value: number) => [`${value}`, "Eventos"]}
+                formatter={(value: number) => [`${value}`, t.dashboard.learning.events]}
               />
               <Bar
                 dataKey="value"
@@ -71,7 +72,7 @@ export const LearningCharts = ({ progress, weeklyBars }: LearningChartsProps) =>
           </ResponsiveContainer>
         ) : (
           <div className="flex h-full items-center justify-center rounded-xl bg-(--axis-surface-strong)">
-            <p className="text-xs text-(--axis-muted)">Sin eventos</p>
+            <p className="text-xs text-(--axis-muted)">{t.dashboard.learning.noEvents}</p>
           </div>
         )}
       </div>
