@@ -11,7 +11,6 @@ export const useSettings = () => {
   
   const [language, setLanguage] = useState<Language>("es");
   const [widgets, setWidgets] = useState<Record<string, boolean>>({});
-  const [notifications, setNotifications] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -31,12 +30,6 @@ export const useSettings = () => {
             widgetMap[w.id] = w.enabled;
           });
           setWidgets(widgetMap);
-          
-          const notifMap: Record<string, boolean> = {};
-          (data.notifications || []).forEach((n) => {
-            notifMap[n.id] = n.enabled;
-          });
-          setNotifications(notifMap);
         }
       } catch (err) {
         console.error("Error loading settings:", err);
@@ -51,17 +44,12 @@ export const useSettings = () => {
     setWidgets((prev) => ({ ...prev, [id]: !prev[id] }));
   }, []);
 
-  const toggleNotification = useCallback((id: string) => {
-    setNotifications((prev) => ({ ...prev, [id]: !prev[id] }));
-  }, []);
-
   const saveSettings = useCallback(async () => {
     setIsSaving(true);
     try {
       await settingsApi.save({
         language,
         widgets: Object.entries(widgets).map(([id, enabled]) => ({ id, enabled })),
-        notifications: Object.entries(notifications).map(([id, enabled]) => ({ id, enabled })),
       });
       
       localStorage.setItem("language", language);
@@ -75,18 +63,16 @@ export const useSettings = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [language, widgets, notifications, t]);
+  }, [language, widgets, t]);
 
   return {
     language,
     setLanguage,
     widgets,
-    notifications,
     isLoading,
     isSaving,
     isSaved,
     toggleWidget,
-    toggleNotification,
     saveSettings,
   };
 };
