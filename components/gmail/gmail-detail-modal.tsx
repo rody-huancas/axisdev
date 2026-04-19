@@ -28,8 +28,8 @@ export const GmailDetailModal = ({ selected, isOpen, onClose, t }: GmailDetailMo
           <div className="flex items-start justify-between gap-4 border-b border-(--axis-border) px-6 py-5">
             <div className="min-w-0 flex-1">
               <p className="text-xs uppercase tracking-[0.3em] text-(--axis-accent)">{t.pages.gmail.message || "Mensaje"}</p>
-              <h3 className="mt-2 truncate text-xl font-semibold text-(--axis-text)">{selected.asunto}</h3>
-              <p className="mt-1 text-sm text-(--axis-muted)">{selected.remitente}</p>
+              <h3 className="mt-2 truncate text-xl font-semibold text-(--axis-text)">{selected.asunto || t.pages.gmail.noSubject}</h3>
+              <p className="mt-1 text-sm text-(--axis-muted)">{selected.remitente || t.pages.gmail.unknownSender}</p>
               {selected.fecha && <p className="mt-1 text-xs text-(--axis-muted)">{selected.fecha}</p>}
             </div>
             <button
