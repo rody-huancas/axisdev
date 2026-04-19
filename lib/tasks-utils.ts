@@ -10,6 +10,22 @@ export const formatDateDisplay = (iso?: string) => {
   }
 };
 
+export const parseDisplayDateToInput = (displayDate: string): string => {
+  if (!displayDate) return "";
+  const months: Record<string, string> = {
+    ene: "01", feb: "02", mar: "03", abr: "04", may: "05", jun: "06",
+    jul: "07", ago: "08", sep: "09", oct: "10", nov: "11", dic: "12",
+  };
+  const parts = displayDate.toLowerCase().split(" ");
+  if (parts.length >= 3) {
+    const day = parts[0].padStart(2, "0");
+    const month = months[parts[1].replace(".", "")] || "01";
+    const year = parts[2];
+    return `${year}-${month}-${day}`;
+  }
+  return "";
+};
+
 export const formatDateRelative = (iso?: string) => {
   if (!iso) return "";
   const date = new Date(iso);
