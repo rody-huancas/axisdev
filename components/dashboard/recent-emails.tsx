@@ -36,8 +36,8 @@ export function RecentEmailsSection({ messages }: RecentEmailsProps) {
               <RiMailLine className="h-5 w-5 text-indigo-600" />
             </div>
             <div className="min-w-0 flex-1 space-y-1">
-              <p className="truncate text-sm font-semibold text-(--axis-text)">{message.asunto}</p>
-              <p className="truncate text-xs text-(--axis-muted)">{message.remitente}</p>
+              <p className="truncate text-sm font-semibold text-(--axis-text)">{message.asunto || t.pages.gmail.noSubject}</p>
+              <p className="truncate text-xs text-(--axis-muted)">{message.remitente || t.pages.gmail.unknownSender}</p>
             </div>
             <RiExternalLinkLine className="h-4 w-4 shrink-0 text-indigo-400" />
           </a>
