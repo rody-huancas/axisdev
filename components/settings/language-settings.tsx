@@ -16,7 +16,7 @@ type LanguageSettingsProps = {
 };
 
 export const LanguageSettings = ({ language, onLanguageChange, t }: LanguageSettingsProps) => (
-  <div className="rounded-3xl border border-(--axis-border) bg-(--axis-surface-strong) p-6">
+  <div className="rounded-3xl border border-(--axis-border) bg-(--axis-surface-strong) p-6 flex h-full flex-col">
     <div className="flex items-center gap-3 mb-5">
       <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/10">
         <RiGlobeLine className="h-5 w-5 text-violet-500" />
@@ -30,13 +30,13 @@ export const LanguageSettings = ({ language, onLanguageChange, t }: LanguageSett
         </p>
       </div>
     </div>
-    <div className="flex gap-3">
+    <div className="mt-1 flex flex-1 items-stretch gap-3">
       {languages.map((lang) => (
         <button
           key={lang.code}
           onClick={() => onLanguageChange(lang.code)}
           className={cn(
-            "flex-1 flex flex-col items-center gap-2 rounded-2xl border px-4 py-4 transition",
+            "flex-1 flex h-full flex-col items-center justify-center gap-2 rounded-2xl border px-4 py-4 transition",
             language === lang.code
               ? "border-violet-500 bg-violet-500/10"
               : "border-(--axis-border) bg-(--axis-surface) hover:border-violet-500/50",

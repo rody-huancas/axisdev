@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { translations, Language, TranslationKeys } from "./translations";
 
 type TranslationContextType = {
@@ -14,33 +14,35 @@ const TranslationContext = createContext<TranslationContextType | null>(null);
 
 const LANGUAGE_CHANGE_EVENT = "language-changed";
 
-export function TranslationProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("es");
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  const loadLanguage = useCallback(() => {
+function detectLanguage(): Language {
+  try {
     const stored = localStorage.getItem("language") as Language | null;
-    
     if (stored && (stored === "es" || stored === "en")) {
-      setLanguageState(stored);
-      setIsLoaded(true);
-      return;
+      return stored;
     }
+  } catch {
+    // ignore
+  }
 
-    const candidates = [navigator.language, ...(navigator.languages ?? [])]
-      .filter(Boolean)
-      .map((value) => String(value).toLowerCase());
+  const candidates = [navigator.language, ...(navigator.languages ?? [])]
+    .filter(Boolean)
+    .map((value) => String(value).toLowerCase());
 
-    const next = candidates.some((value) => value.startsWith("es")) ? "es" : "en";
+  const next: Language = candidates.some((value) => value.startsWith("es")) ? "es" : "en";
 
-    setLanguageState(next);
+  try {
     localStorage.setItem("language", next);
-    setIsLoaded(true);
-  }, []);
+  } catch {
+    // ignore
+  }
+
+  return next;
+}
+
+export function TranslationProvider({ children }: { children: ReactNode }) {
+  const [language, setLanguageState] = useState<Language>(() => detectLanguage());
 
   useEffect(() => {
-    loadLanguage();
-
     const handleLanguageChange = (event: CustomEvent<Language>) => {
       setLanguageState(event.detail);
     };
@@ -50,22 +52,21 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
     return () => {
       window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange as EventListener);
     };
-  }, [loadLanguage]);
+  }, []);
 
   useEffect(() => {
-    if (!isLoaded) return;
     document.documentElement.lang = language;
-  }, [language, isLoaded]);
+  }, [language]);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem("language", lang);
+    try {
+      localStorage.setItem("language", lang);
+    } catch {
+      // ignore
+    }
     window.dispatchEvent(new CustomEvent(LANGUAGE_CHANGE_EVENT, { detail: lang }));
   };
-
-  if (!isLoaded) {
-    return null;
-  }
 
   return (
     <TranslationContext.Provider value={{ language, setLanguage, t: translations[language] }}>

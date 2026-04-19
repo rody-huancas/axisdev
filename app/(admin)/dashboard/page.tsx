@@ -12,6 +12,7 @@ import { LearningCharts } from "@/components/dashboard/learning-charts";
 import { GreetingSection } from "@/components/dashboard/greeting-section";
 import { RecentFilesSection } from "@/components/dashboard/recent-files-section";
 import { RecentEmailsSection } from "@/components/dashboard/recent-emails";
+import { ServiceAccessBanner } from "@/components/dashboard/service-access-banner";
 import { getOrCreateUserSettings } from "@/lib/settings";
 import { computeStorageBreakdown, computeWeeklyBars, computeTaskStats } from "@/lib/utils/dashboard-storage";
 import { fetchCalendarEvents, fetchGmailPreview, fetchGmailUnreadCount, fetchRecentFiles, fetchStorageInfo, fetchTasksPreview } from "@/services";
@@ -75,6 +76,13 @@ const DashboardPage = async () => {
   const gmailUnreadCount = gmailUnreadResult.ok ? gmailUnreadResult.data : 0;
   const storageInfo      = storageResult.ok ? storageResult.data : { usadoGb: 0, limiteGb: 0, porcentaje: 0 };
 
+  const missingServices = [
+    !filesResult.ok || !storageResult.ok ? "Drive" : null,
+    !eventsResult.ok ? "Calendar" : null,
+    !tasksResult.ok ? "Tasks" : null,
+    !gmailResult.ok || !gmailUnreadResult.ok ? "Gmail" : null,
+  ].filter(Boolean) as string[];
+
   const storageBreakdown = computeStorageBreakdown(driveFiles);
   const weeklyBars = computeWeeklyBars(calendarEvents);
   const taskStats = computeTaskStats(tasks);
@@ -89,6 +97,7 @@ const DashboardPage = async () => {
 
   return (
     <section className="space-y-6">
+      <ServiceAccessBanner missingServices={missingServices} />
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-6 min-w-0">
           <DashboardHero userName={userName} />
