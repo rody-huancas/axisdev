@@ -1,8 +1,8 @@
 "use client";
 
 import { SlotInfo, Calendar, Views } from "react-big-calendar";
-import { CalendarEvent } from "./types";
 import { localizer } from "@/lib/calendar-utils";
+import { CalendarEvent } from "./types";
 import { useTranslation } from "@/lib/i18n";
 
 type Props = {
@@ -15,19 +15,19 @@ export const CalendarView = ({ events, onSelectSlot, onSelectEvent }: Props) => 
   const { t } = useTranslation();
   
   const messages = {
-    allDay: t.common.allDay || "Todo el dia",
-    previous: t.pages.calendar.previous,
-    next: t.pages.calendar.next,
-    today: t.pages.calendar.today,
-    month: t.pages.calendar.month,
-    week: t.pages.calendar.week,
-    day: t.pages.calendar.day,
-    agenda: t.pages.calendar.agenda,
-    date: t.pages.calendar.date,
-    time: t.pages.calendar.time || "Hora",
-    event: t.pages.calendar.event,
-    noEventsInRange: t.pages.calendar.noEvents || "No hay eventos en este rango.",
-    showMore: (total: number) => `+${total} mas`,
+    allDay         : t.pages.calendar.allDay,
+    previous       : t.pages.calendar.previous,
+    next           : t.pages.calendar.next,
+    today          : t.pages.calendar.today,
+    month          : t.pages.calendar.month,
+    week           : t.pages.calendar.week,
+    day            : t.pages.calendar.day,
+    agenda         : t.pages.calendar.agenda,
+    date           : t.pages.calendar.date,
+    time           : t.pages.calendar.time,
+    event          : t.pages.calendar.event,
+    noEventsInRange: t.pages.calendar.noEvents,
+    showMore       : (total: number) => `+${total} ${t.pages.calendar.more}`,
   };
 
   const culture = t.common.lang === "en" ? "en" : "es";
