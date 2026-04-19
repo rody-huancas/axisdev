@@ -53,7 +53,7 @@ const CalendarPage = async () => {
     .filter((event) => event.id)
     .map((event) => ({
       id         : event.id as string,
-      title      : event.summary ?? "(Sin titulo)",
+      title      : event.summary ?? "",
       start      : toIso(event.start?.dateTime, event.start?.date),
       end        : toEndIso(event.end?.dateTime, event.end?.date),
       meetLink   : extractMeetLink(event),

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { RiCloseLine } from "react-icons/ri";
+import { usePageTranslations } from "@/lib/i18n";
 
 type Props = {
   isOpen   : boolean;
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export const CreateTaskModal = ({ isOpen, onClose, onCreate, isLoading }: Props) => {
+  const t = usePageTranslations();
   const [title, setTitle] = useState<string>("");
   const [due  , setDue  ] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
@@ -41,7 +43,7 @@ export const CreateTaskModal = ({ isOpen, onClose, onCreate, isLoading }: Props)
         <div className="w-full max-w-2xl overflow-hidden rounded-3xl border border-(--axis-border) bg-(--axis-surface) shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
           <div className="flex items-center justify-between border-b border-(--axis-border) px-6 py-4">
             <h3 className="text-xl font-semibold text-(--axis-text)">
-              Nueva tarea
+              {t.pages.tasks.newTask}
             </h3>
             <button
               type="button"
@@ -55,12 +57,12 @@ export const CreateTaskModal = ({ isOpen, onClose, onCreate, isLoading }: Props)
           <div className="space-y-5 p-6">
             <div>
               <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted)">
-                Titulo
+                {t.pages.tasks.titleField}
               </label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Que necesitas hacer?"
+                placeholder={t.pages.tasks.titlePlaceholder}
                 className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-5 py-4 text-base text-(--axis-text) placeholder:text-(--axis-muted) focus:border-(--axis-accent) focus:outline-none"
                 autoFocus
               />
@@ -68,7 +70,7 @@ export const CreateTaskModal = ({ isOpen, onClose, onCreate, isLoading }: Props)
 
             <div>
               <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted)">
-                Fecha limite
+                {t.pages.tasks.dueDate}
               </label>
               <input
                 type="date"
@@ -80,12 +82,12 @@ export const CreateTaskModal = ({ isOpen, onClose, onCreate, isLoading }: Props)
 
             <div>
               <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-(--axis-muted)">
-                Notas / Detalles
+                {t.pages.tasks.notes}
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Agrega mas detalles..."
+                placeholder={t.pages.tasks.notesPlaceholder}
                 rows={4}
                 className="w-full rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) px-5 py-4 text-base text-(--axis-text) placeholder:text-(--axis-muted) focus:border-(--axis-accent) focus:outline-none resize-none"
               />
@@ -97,7 +99,7 @@ export const CreateTaskModal = ({ isOpen, onClose, onCreate, isLoading }: Props)
                 onClick={handleClose}
                 className="rounded-2xl border border-(--axis-border) px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong)"
               >
-                Cancelar
+                {t.common.cancel}
               </button>
               <button
                 type="button"
@@ -105,7 +107,7 @@ export const CreateTaskModal = ({ isOpen, onClose, onCreate, isLoading }: Props)
                 disabled={isLoading || !title.trim()}
                 className="rounded-2xl bg-(--axis-accent) px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:opacity-90 disabled:opacity-50"
               >
-                {isLoading ? "Creando..." : "Crear"}
+                {isLoading ? t.pages.tasks.creating : t.pages.tasks.create}
               </button>
             </div>
           </div>

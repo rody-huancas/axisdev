@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
 import { RiCloseLine } from "react-icons/ri";
 import { cn } from "@/lib/utils";
-import { useTranslation } from "@/lib/i18n";
 import { TimeDropdown } from "./time-dropdown";
-import { timeToMinutes, minutesToTime, buildTimeOptions } from "@/lib/calendar-utils";
+import { useTranslation } from "@/lib/i18n";
+import { useCreateEventTimeOptions } from "./hooks/use-create-event-time-options";
+import { getDayPartForTime, getEndTimeByDuration, syncEndAfterStart } from "./utils/create-event-time";
 
 type CreateModalProps = {
   isOpen              : boolean;
@@ -30,17 +30,6 @@ type CreateModalProps = {
   setCreateAttendees  : (v: string) => void;
   createMeet          : boolean;
   setCreateMeet       : (v: boolean) => void;
-};
-
-const syncEndAfterStart = (start: string, prevEnd: string) => {
-  const startMin = timeToMinutes(start);
-  const endMin   = timeToMinutes(prevEnd);
-
-  if (Number.isNaN(startMin) || Number.isNaN(endMin)) return prevEnd;
-  if (endMin <= startMin) {
-    return minutesToTime(Math.min(startMin + 30, 23 * 60 + 30));
-  }
-  return prevEnd;
 };
 
 export const CreateEventModal = (props: CreateModalProps) => {
@@ -70,32 +59,19 @@ export const CreateEventModal = (props: CreateModalProps) => {
     setCreateMeet,
   } = props;
 
+  const { startOptions, endOptions } = useCreateEventTimeOptions(createDayPart, createStartTime);
 
-  const startOptions = useMemo(() => {
-    const all = buildTimeOptions(6 * 60, 22 * 60 + 30, 30);
-    
-    if (createDayPart === "morning") {
-      return all.filter((value) => {
-        const minutes = timeToMinutes(value);
-        return minutes >= 6 * 60 && minutes < 12 * 60;
-      });
+  const applyDayPartPreset = (next: "morning" | "afternoon") => {
+    setCreateDayPart(next);
+    if (next === "morning") {
+      setCreateStartTime("09:00");
+      setCreateEndTime("10:00");
+      return;
     }
 
-    return all.filter((value) => {
-      const minutes = timeToMinutes(value);
-      return minutes >= 12 * 60 && minutes <= 22 * 60;
-    });
-  }, [createDayPart]);
-
-  const endOptions = useMemo(() => {
-    const startMinutes = timeToMinutes(createStartTime);
-    const all          = buildTimeOptions(6 * 60, 23 * 60 + 30, 30);
-
-    return all.filter((value) => {
-      const minutes = timeToMinutes(value);
-      return !Number.isNaN(startMinutes) && minutes > startMinutes;
-    });
-  }, [createStartTime]);
+    setCreateStartTime("15:00");
+    setCreateEndTime("16:00");
+  };
 
   if (!isOpen) return null;
 
@@ -149,9 +125,7 @@ export const CreateEventModal = (props: CreateModalProps) => {
                   <button
                     type="button"
                     onClick={() => {
-                      setCreateDayPart("morning");
-                      setCreateStartTime("09:00");
-                      setCreateEndTime("10:00");
+                      applyDayPartPreset("morning");
                     }}
                     className={cn(
                       "flex-1 rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition",
@@ -166,9 +140,7 @@ export const CreateEventModal = (props: CreateModalProps) => {
                   <button
                     type="button"
                     onClick={() => {
-                      setCreateDayPart("afternoon");
-                      setCreateStartTime("15:00");
-                      setCreateEndTime("16:00");
+                      applyDayPartPreset("afternoon");
                     }}
                     className={cn(
                       "flex-1 rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition",
@@ -190,10 +162,10 @@ export const CreateEventModal = (props: CreateModalProps) => {
                 disabled={isLoading}
                 onChange={(next) => {
                   setCreateStartTime(next);
-                  const nextMinutes = timeToMinutes(next);
-                  if (!Number.isNaN(nextMinutes)) {
-                    setCreateDayPart(nextMinutes < 12 * 60 ? "morning" : "afternoon");
-                  }
+
+                  const nextDayPart = getDayPartForTime(next);
+                  if (nextDayPart) setCreateDayPart(nextDayPart);
+
                   setCreateEndTime(syncEndAfterStart(next, createEndTime));
                 }}
               />
@@ -206,19 +178,16 @@ export const CreateEventModal = (props: CreateModalProps) => {
                 onChange={(next) => setCreateEndTime(next)}
               />
 
-              <div className="flex flex-wrap gap-2 sm:col-span-2">
-                {[30, 60, 120].map((duration) => (
-                  <button
-                    key={duration}
-                    type="button"
-                    onClick={() => {
-                      const startMinutes = timeToMinutes(createStartTime);
-                      if (Number.isNaN(startMinutes)) return;
-                      const maxEnd = 23 * 60 + 30;
-                      const nextEnd = Math.min(startMinutes + duration, maxEnd);
-                      if (nextEnd <= startMinutes) return;
-                      setCreateEndTime(minutesToTime(nextEnd));
-                    }}
+                <div className="flex flex-wrap gap-2 sm:col-span-2">
+                  {[30, 60, 120].map((duration) => (
+                    <button
+                      key={duration}
+                      type="button"
+                      onClick={() => {
+                        const nextEnd = getEndTimeByDuration(createStartTime, duration);
+                        if (!nextEnd) return;
+                        setCreateEndTime(nextEnd);
+                      }}
                     disabled={isLoading}
                     className="rounded-full border border-(--axis-border) bg-(--axis-surface-strong) px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-(--axis-muted) transition hover:bg-(--axis-surface) hover:text-(--axis-text) disabled:opacity-50"
                   >

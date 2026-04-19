@@ -43,8 +43,8 @@ export async function GET(
   }
 
   const headers = data.payload?.headers ?? [];
-  const subject = getHeaderValue(headers, "Subject") || "Sin asunto";
-  const from    = getHeaderValue(headers, "From")    || "Remitente desconocido";
+  const subject = getHeaderValue(headers, "Subject") || "";
+  const from    = getHeaderValue(headers, "From")    || "";
   const date    = getHeaderValue(headers, "Date")    || "";
   const to      = getHeaderValue(headers, "To")      || "";
 

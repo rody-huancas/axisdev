@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { UserAuthForm } from "@/components/shared/user-auth-form";
-import { LandingLogo, LandingBadge, LandingHeadline, LandingDescription, LandingPreview, LandingTags, LandingFooter } from "@/components/landing";
+import { LandingLogo, LandingBadge, LandingHeadline, LandingDescription, LandingPreview, LandingTags, LandingFooter, LandingAuthCard } from "@/components/landing";
 
 const HomePage = async () => {
   const session = await auth();
@@ -20,17 +19,7 @@ const HomePage = async () => {
 
             <LandingDescription />
 
-            <div className="max-w-95 rounded-2xl border border-[#DDDBD3] bg-white p-4.5 flex flex-col gap-3">
-              <span className="text-[9px] uppercase tracking-[0.2em] text-gray-700 font-medium" style={{ fontFamily: "var(--font-geist-mono)" }}>
-                Acceso seguro
-              </span>
-
-              <UserAuthForm />
-
-              <p className="text-center text-[9px] text-gray-600 tracking-[0.08em]" style={{ fontFamily: "var(--font-geist-mono)" }}>
-                Sin contraseña · Acceso con tu cuenta de Google
-              </p>
-            </div>
+            <LandingAuthCard />
 
             <LandingTags />
           </div>
