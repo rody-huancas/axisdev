@@ -3,8 +3,10 @@
 import { useState, useTransition } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { usePageTranslations } from "@/lib/i18n";
 
 export const UserAuthForm = () => {
+  const t = usePageTranslations();
   const [isPending, startTransition] = useTransition();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
@@ -55,10 +57,10 @@ export const UserAuthForm = () => {
           {isPending || isRedirecting ? (
             <span className="flex items-center gap-2">
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900" />
-              <span>Conectando...</span>
+              <span>{t.auth.connecting}</span>
             </span>
           ) : (
-            <span className="text-sm font-medium">Continuar con Google</span>
+            <span className="text-sm font-medium">{t.auth.continueWithGoogle}</span>
           )}
         </span>
       </Button>
