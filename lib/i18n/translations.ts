@@ -21,13 +21,21 @@ export const translations = {
       connecting        : "Conectando...",
     },
     settings: {
-      title        : "Configuración",
-      subtitle     : "Personaliza tu experiencia",
-      language     : { title: "Idioma", description: "Idioma de la interfaz" },
-      widgets      : { title: "Widgets", description: "Qué mostrar en el dashboard" },
-      notifications: { title: "Notificaciones", description: "Cómo recibir alertas" },
-      integrations : { title: "Integraciones", description: "Cuentas conectadas" },
-      about        : { title: "Acerca de", description: "Información de la app" },
+      title             : "Configuración",
+      subtitle          : "Personaliza tu experiencia",
+      language          : { title: "Idioma", description: "Idioma de la interfaz" },
+      widgets           : { title: "Widgets", description: "Qué mostrar en el dashboard" },
+      notifications     : { title: "Notificaciones", description: "Cómo recibir alertas" },
+      integrations      : { title: "Integraciones", description: "Cuentas conectadas" },
+      integrationsBanner: {
+        reconnect         : "Reautorizar",
+        missingTitle      : "Acceso incompleto",
+        missingDescription: "Activa permisos para que AxisDev pueda leer tus servicios.",
+        missingLabel      : "Falta acceso a",
+        needsAccess       : "Requiere acceso",
+        unknown           : "Sin verificar",
+      },
+      about: { title: "Acerca de", description: "Información de la app" },
     },
     sidebar: {
       dashboard: "Dashboard",
@@ -86,6 +94,13 @@ export const translations = {
         events  : "Eventos",
         noEvents: "Sin eventos",
       },
+      access: {
+        title       : "Acceso a servicios pendiente",
+        description : "No pudimos leer algunos servicios de Google. Reautoriza tu cuenta o revisa integraciones.",
+        missingLabel: "Falta acceso a",
+        openSettings: "Configuracion",
+        reconnect   : "Reautorizar",
+      },
       summary: "Resumen",
     },
     landing: {
@@ -106,7 +121,7 @@ export const translations = {
         demoUserInitials: "JD",
         demoFileName    : "Propuesta Q2.docx",
         dashboardTitle  : "Dashboard",
-        services: {
+        services        : {
           drive   : "Drive",
           calendar: "Calendario",
           gmail   : "Gmail",
@@ -367,13 +382,21 @@ export const translations = {
       connecting        : "Connecting...",
     },
     settings: {
-      title        : "Settings",
-      subtitle     : "Customize your experience",
-      language     : { title: "Language", description: "Interface language" },
-      widgets      : { title: "Widgets", description: "What to show on the dashboard" },
-      notifications: { title: "Notifications", description: "How to receive alerts" },
-      integrations : { title: "Integrations", description: "Connected accounts" },
-      about        : { title: "About", description: "App information" },
+      title             : "Settings",
+      subtitle          : "Customize your experience",
+      language          : { title: "Language", description: "Interface language" },
+      widgets           : { title: "Widgets", description: "What to show on the dashboard" },
+      notifications     : { title: "Notifications", description: "How to receive alerts" },
+      integrations      : { title: "Integrations", description: "Connected accounts" },
+      integrationsBanner: {
+        reconnect         : "Reconnect",
+        missingTitle      : "Incomplete access",
+        missingDescription: "Grant permissions so AxisDev can read your services.",
+        missingLabel      : "Missing access to",
+        needsAccess       : "Needs access",
+        unknown           : "Not checked",
+      },
+      about: { title: "About", description: "App information" },
     },
     sidebar: {
       dashboard: "Dashboard",
@@ -432,6 +455,13 @@ export const translations = {
         events  : "Events",
         noEvents: "No events",
       },
+      access: {
+        title       : "Service access required",
+        description : "We could not read some Google services. Reconnect your account or review integrations.",
+        missingLabel: "Missing access to",
+        openSettings: "Settings",
+        reconnect   : "Reconnect",
+      },
       summary: "Summary",
     },
     landing: {
@@ -452,7 +482,7 @@ export const translations = {
         demoUserInitials: "JD",
         demoFileName    : "Q2 Proposal.docx",
         dashboardTitle  : "Dashboard",
-        services: {
+        services        : {
           drive   : "Drive",
           calendar: "Calendar",
           gmail   : "Gmail",
