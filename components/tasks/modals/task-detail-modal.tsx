@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { RiCloseLine, RiDeleteBin6Line, RiEditLine, RiCheckboxCircleLine, RiCheckboxLine } from "react-icons/ri";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
 import type { TareaPendiente } from "@/services/google-service";
+import { useTaskDetailEdit } from "@/hooks/use-task-detail-edit";
 
 type Props = {
   task       : TareaPendiente | null;
@@ -19,68 +19,34 @@ type Props = {
   isLoading  : boolean;
 };
 
-const parseDisplayDateToInput = (displayDate: string): string => {
-  if (!displayDate) return "";
-  const months: Record<string, string> = {
-    ene: "01", feb: "02", mar: "03", abr: "04", may: "05", jun: "06",
-    jul: "07", ago: "08", sep: "09", oct: "10", nov: "11", dic: "12",
-  };
-  const parts = displayDate.toLowerCase().split(" ");
-  if (parts.length >= 3) {
-    const day = parts[0].padStart(2, "0");
-    const month = months[parts[1].replace(".", "")] || "01";
-    const year = parts[2];
-    return `${year}-${month}-${day}`;
-  }
-  return "";
-};
-
 export const TaskDetailModal = (props: Props) => {
   const { t } = useTranslation();
   const { task, isOpen, isEditOpen, onClose, onEditOpen, onEditClose, onUpdate, onToggle, onDelete, isLoading } = props;
 
-  const [editTitle, setEditTitle] = useState<string>("");
-  const [editDue  , setEditDue  ] = useState<string>("");
-  const [editNotes, setEditNotes] = useState<string>("");
-
-  useEffect(() => {
-    if (task && isEditOpen) {
-      setEditTitle(task.titulo);
-      setEditDue(parseDisplayDateToInput(task.vence || ""));
-      setEditNotes(task.descripcion || "");
-    }
-  }, [task, isEditOpen]);
-
-  const handleClose = () => {
-    setEditTitle("");
-    setEditDue("");
-    setEditNotes("");
-    onEditClose();
-    onClose();
-  };
-
-  const handleSave = async () => {
-    if (!editTitle.trim()) return;
-    await onUpdate({
-      title: editTitle.trim(),
-      due  : editDue || undefined,
-      notes: editNotes || undefined,
-    });
-    handleClose();
-  };
+  const {
+    editTitle,
+    setEditTitle,
+    editDue,
+    setEditDue,
+    editNotes,
+    setEditNotes,
+    closeAll,
+    cancelEdit,
+    saveEdit,
+  } = useTaskDetailEdit({ task, isEditOpen, onClose, onEditClose, onUpdate });
 
   if (!isOpen || !task) return null;
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="fixed inset-0 bg-black/60" onClick={handleClose} />
+      <div className="fixed inset-0 bg-black/60" onClick={closeAll} />
       <div className="relative z-10 flex h-dvh items-center justify-center p-4">
         <div className="w-full max-w-2xl overflow-hidden rounded-3xl border border-(--axis-border) bg-(--axis-surface) shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
           <div className="flex items-center justify-between border-b border-(--axis-border) px-6 py-4">
             <h3 className="text-xl font-semibold text-(--axis-text)">{t.pages.tasks.detail || "Detalle"}</h3>
             <button
               type="button"
-              onClick={handleClose}
+              onClick={closeAll}
               className="flex h-10 w-10 items-center justify-center rounded-2xl border border-(--axis-border) bg-(--axis-surface-strong) text-(--axis-muted) transition hover:bg-(--axis-surface) hover:text-(--axis-text)"
             >
               <RiCloseLine className="h-5 w-5" />
@@ -128,24 +94,19 @@ export const TaskDetailModal = (props: Props) => {
                 <div className="flex justify-end gap-3 pt-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      setEditTitle(task.titulo);
-                      setEditDue(parseDisplayDateToInput(task.vence || ""));
-                      setEditNotes(task.descripcion || "");
-                      onEditClose();
-                    }}
+                    onClick={cancelEdit}
                     className="rounded-2xl border border-(--axis-border) px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-(--axis-muted) transition hover:bg-(--axis-surface-strong)"
                   >
                     {t.common.cancel}
                   </button>
                   <button
                     type="button"
-                    onClick={handleSave}
+                    onClick={saveEdit}
                     disabled={isLoading || !editTitle.trim()}
                     className="rounded-2xl bg-(--axis-accent) px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:opacity-90 disabled:opacity-50"
                   >
-{isLoading ? t.common.saving : t.common.save}
-                    </button>
+                    {isLoading ? t.common.saving : t.common.save}
+                  </button>
                 </div>
               </>
             ) : (
