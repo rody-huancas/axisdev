@@ -7,18 +7,21 @@ import { useTranslation } from "@/lib/i18n";
 import { WidgetsSettings } from "@/components/settings/widgets-settings";
 import { LanguageSettings } from "@/components/settings/language-settings";
 import { IntegrationsSettings } from "@/components/settings/integrations-settings";
-import { NotificationsSettings } from "@/components/settings/notifications-settings";
 
 export default function SettingsPage() {
   const { t } = useTranslation();
   
-  const { language, setLanguage, widgets, notifications, isLoading, isSaving, isSaved, toggleWidget, toggleNotification, saveSettings } = useSettings();
+  const { language, setLanguage, widgets, isLoading, isSaving, isSaved, toggleWidget, saveSettings } = useSettings();
 
   if (isLoading) {
     return (
       <section className="rounded-2xl border bg-(--axis-surface) px-6 py-5 shadow-[0_14px_40px_rgba(15,23,42,0.08)]">
-        <div className="flex items-center justify-center py-20">
-          <span className="h-8 w-8 animate-spin text-(--axis-accent)">↻</span>
+        <div className="flex flex-col items-center justify-center gap-4 py-20">
+          <div className="relative h-10 w-10">
+            <div className="absolute inset-0 rounded-full border-2 border-(--axis-border) opacity-30" />
+            <div className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-(--axis-accent)" />
+          </div>
+          <p className="text-sm text-(--axis-muted)">{t.common.loading}</p>
         </div>
       </section>
     );
@@ -43,12 +46,6 @@ export default function SettingsPage() {
         <WidgetsSettings
           enabledWidgets={widgets}
           onToggle={toggleWidget}
-          t={t}
-        />
-
-        <NotificationsSettings
-          notifications={notifications}
-          onToggle={toggleNotification}
           t={t}
         />
 
