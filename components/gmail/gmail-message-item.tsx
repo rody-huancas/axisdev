@@ -28,10 +28,10 @@ export const GmailMessageItem = ({ item, onClick, t }: GmailMessageItemProps) =>
     </div>
     <div className="min-w-0 flex-1">
       <p className="truncate text-sm font-semibold text-(--axis-text)">
-        {item.remitente}
+        {item.remitente || t.pages.gmail.unknownSender}
       </p>
       <p className="mt-0.5 truncate text-xs font-medium text-(--axis-muted)">
-        {item.asunto}
+        {item.asunto || t.pages.gmail.noSubject}
       </p>
       <p className="mt-1 line-clamp-2 text-xs text-(--axis-muted)">
         {cleanSnippet(item.snippet)}
